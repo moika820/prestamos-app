@@ -7,38 +7,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mk Prestamos">
-    <meta name="theme-color" content="#2b2b2b">
+    <meta name="theme-color" content="#5f4479">
     <title>Mk Prestamos</title>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <!-- PWA Manifest (inline) -->
-    <script>
-        const manifest = {
-            name: "Mk Prestamos",
-            short_name: "MkPrestamos",
-            start_url: ".",
-            display: "standalone",
-            background_color: "#ffffff",
-            theme_color: "#5f4479",
-            icons: [
-                {
-                    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>",
-                    sizes: "100x100",
-                    type: "image/svg+xml"
-                }
-            ]
-        };
-        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-        const manifestURL = URL.createObjectURL(blob);
-        document.getElementById('manifestLink').href = manifestURL;
-    </script>
-    <link rel="manifest" id="manifestLink">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
 
     <style>
         :root {
@@ -53,43 +28,25 @@
             --danger: #b5482f;
             --success: #3d7d17;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
             font-family: var(--font-data);
             background: var(--bg);
             color: var(--text);
             padding: 16px;
             transition: all 0.3s ease;
-            position: relative;
             min-height: 100vh;
         }
-
-        /* Modo oscuro (Luna) */
         body.dark {
-            --bg: #17171c;
-            --card-bg: #242430;
-            --text: #e8e8ef;
-            --primary: #c9a8ff;
-            --accent: #2d1f3a;
-            --border: #444455;
-            --danger: #ff6b6b;
-            --success: #4caf50;
+            --bg: #17171c; --card-bg: #242430; --text: #e8e8ef;
+            --primary: #c9a8ff; --accent: #2d1f3a; --border: #444455;
+            --danger: #ff6b6b; --success: #4caf50;
         }
-
-        /* Modo sol (máximo contraste) */
         body.sol {
-            --bg: #ffffff;
-            --card-bg: #ffffff;
-            --text: #000000;
-            --primary: #000000;
-            --accent: #fffde0;
-            --border: #000000;
-            --danger: #cc0000;
-            --success: #006600;
+            --bg: #ffffff; --card-bg: #ffffff; --text: #000000;
+            --primary: #000000; --accent: #fffde0; --border: #000000;
+            --danger: #cc0000; --success: #006600;
         }
-
         body.sol .card { border: 2px solid black; }
         body.sol .card-actions-wrapper button { border: 1px solid black; }
         body.sol .modal-box { background: #ffffff; color: #000; border-color: #000; }
@@ -101,59 +58,26 @@
         }
         .app-header h1 { font-family: var(--font-head); font-size: 21px; color: var(--primary); }
         .app-header h1 span { display: block; font-size: 13px; color: #7a5c99; }
+        #clock { font-size: 13px; background: #fff; color: #000; font-weight: bold; padding: 6px 14px; border-radius: 6px; border: 1px solid #ccc; white-space: nowrap; }
+        body.dark #clock { background: #111; color: #fff; border-color: #555; }
+        body.sol #clock { background: #fff; color: #000; border-color: #000; }
 
-        #clock {
-            font-size: 13px; background: #fff; color: #000; font-weight: bold;
-            padding: 6px 14px; border-radius: 6px; border: 1px solid #ccc;
-            white-space: nowrap;
-        }
-
-        .tabs {
-            display: flex; gap: 2px; background: var(--card-bg); padding: 0 14px;
-            border-radius: 8px; margin-bottom: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        }
-        .tab-btn {
-            border: none; background: transparent; padding: 13px 16px;
-            font-size: 13.5px; font-weight: bold; color: #777; cursor: pointer;
-            border-bottom: 3px solid transparent; white-space: nowrap;
-            font-family: var(--font-data);
-        }
+        .tabs { display: flex; gap: 2px; background: var(--card-bg); padding: 0 14px; border-radius: 8px; margin-bottom: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); flex-wrap: wrap; }
+        .tab-btn { border: none; background: transparent; padding: 13px 16px; font-size: 13.5px; font-weight: bold; color: #777; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; font-family: var(--font-data); }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-
         .tab-pane { display: none; }
         .tab-pane.active { display: block; }
 
-        .fichas-toolbar {
-            display: flex; gap: 10px; align-items: center; margin-bottom: 16px;
-            flex-wrap: wrap; background: var(--card-bg); padding: 12px 16px;
-            border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        }
-        #ordenSelect {
-            padding: 9px 10px; font-size: 13px; border-radius: 6px;
-            border: 1px solid #999; background: var(--card-bg); color: var(--text);
-        }
+        .fichas-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; background: var(--card-bg); padding: 12px 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        #ordenSelect { padding: 9px 10px; font-size: 13px; border-radius: 6px; border: 1px solid #999; background: var(--card-bg); color: var(--text); }
 
         .cards-container { display: flex; flex-direction: column; align-items: center; gap: 30px; }
-
-        .card-wrapper {
-            width: 640px; max-width: 95vw; position: relative;
-            transition: box-shadow 0.3s;
-        }
-        .card-wrapper.atrasada {
-            box-shadow: 0 0 15px 3px rgba(255,0,0,0.5);
-            border-radius: 4px;
-        }
+        .card-wrapper { width: 640px; max-width: 95vw; position: relative; transition: box-shadow 0.3s; }
+        .card-wrapper.atrasada { box-shadow: 0 0 15px 3px rgba(255,0,0,0.5); border-radius: 4px; }
 
         .pages-container { position: relative; width: 100%; min-height: 420px; }
-        .page-boleta {
-            position: relative; z-index: 2; transition: transform 0.5s;
-            transform-origin: left center;
-        }
-        .card-wrapper.mostrando-bitacora .page-boleta {
-            transform: perspective(1200px) rotateY(-8deg) translateX(-20px) scale(0.97);
-            box-shadow: -8px 8px 30px rgba(0,0,0,0.25);
-            z-index: 1;
-        }
+        .page-boleta { position: relative; z-index: 2; transition: transform 0.5s; transform-origin: left center; }
+        .card-wrapper.mostrando-bitacora .page-boleta { transform: perspective(1200px) rotateY(-8deg) translateX(-20px) scale(0.97); box-shadow: -8px 8px 30px rgba(0,0,0,0.25); z-index: 1; }
 
         .page-bitacora {
             position: absolute; top: 0; left: 0; width: 100%; z-index: 1;
@@ -163,130 +87,69 @@
             min-height: 420px; padding: 20px 24px;
             box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6), 0 4px 20px rgba(0,0,0,0.1);
         }
-        .card-wrapper.mostrando-bitacora .page-bitacora {
-            opacity: 1; transform: perspective(1200px) rotateY(0deg) translateX(0px) scale(1);
-            z-index: 3; pointer-events: auto;
-        }
-
+        .card-wrapper.mostrando-bitacora .page-bitacora { opacity: 1; transform: perspective(1200px) rotateY(0deg) translateX(0px) scale(1); z-index: 3; pointer-events: auto; }
         .page-bitacora h3 { font-family: var(--font-head); color: #3a2d4f; }
-        .bitacora-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px;
-            background: rgba(255,248,240,0.7); border: 1px solid var(--border);
-            border-radius: 6px; padding: 8px 12px; margin-bottom: 12px;
-            font-size: 12px; font-family: 'Courier New', monospace;
-        }
+        .bitacora-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; background: rgba(255,248,240,0.7); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; font-size: 12px; font-family: 'Courier New', monospace; }
         .bitacora-list { font-size: 12px; max-height: 300px; overflow-y: auto; }
 
-        .card {
-            background: #f0c9e6; border: 3px solid #e8c144; border-radius: 4px;
-            padding: 16px 20px 20px 20px; position: relative;
-        }
-        .card.pagada::after {
-            content: "✅ PAGADO";
-            position: absolute; top: 20px; right: 20px;
-            background: #4caf50; color: white; padding: 8px 16px;
-            border-radius: 20px; font-weight: bold; font-size: 18px;
-            transform: rotate(15deg); opacity: 0.9;
-        }
-
+        .card { background: #f0c9e6; border: 3px solid #e8c144; border-radius: 4px; padding: 16px 20px 20px 20px; position: relative; }
+        .card.pagada::after { content: "✅ PAGADO"; position: absolute; top: 20px; right: 20px; background: #4caf50; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 18px; transform: rotate(15deg); opacity: 0.9; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .card-title { font-family: var(--font-head); font-size: 24px; color: #2b2b2b; }
-        .ficha-num { font-size: 13px; font-weight: bold; color: #5f4479; background: #fff;
-            border-radius: 4px; padding: 3px 8px; display: inline-block; margin-bottom: 6px; }
-        .coin { width: 46px; height: 46px; border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #8bd050, #4c9a1f);
-            display: flex; align-items: center; justify-content: center;
-            color: #f5d000; font-weight: bold; font-size: 22px; border: 2px solid #3d7d17; }
-
+        .ficha-num { font-size: 13px; font-weight: bold; color: #5f4479; background: #fff; border-radius: 4px; padding: 3px 8px; display: inline-block; margin-bottom: 6px; }
+        .coin { width: 46px; height: 46px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #8bd050, #4c9a1f); display: flex; align-items: center; justify-content: center; color: #f5d000; font-weight: bold; font-size: 22px; border: 2px solid #3d7d17; }
         .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; margin: 8px 0; }
         .fld { font-size: 13px; font-weight: bold; color: #2b2b2b; }
         .fld label { font-size: 11px; color: #5a4a4a; font-weight: normal; }
-        .fld input, .fld select { width: 100%; border: none; border-bottom: 1px dashed #4a4a4a;
-            background: transparent; font-size: 14px; font-weight: bold; color: #222; padding: 2px 0; }
-
+        .fld input, .fld select { width: 100%; border: none; border-bottom: 1px dashed #4a4a4a; background: transparent; font-size: 14px; font-weight: bold; color: #222; padding: 2px 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 12px; background: #f0c9e6; }
         th, td { border: 1px solid #333; text-align: center; font-size: 12px; padding: 3px 1px; }
         th { font-weight: bold; font-family: var(--font-head); }
-        td input { width: 100%; border: none; background: transparent; text-align: center;
-            font-size: 12px; padding: 3px 0; }
+        td input { width: 100%; border: none; background: transparent; text-align: center; font-size: 12px; padding: 3px 0; }
         .restante-cell { font-weight: bold; background: rgba(255,248,224,0.6); }
-
         .ultimo-pago { font-size: 12px; color: #4a3800; text-align: right; margin-top: 4px; }
-
         .date-field { position: relative; }
-        .date-text { width: 100%; border: none; background: transparent; text-align: center;
-            font-size: 12px; padding: 3px 0; pointer-events: none; }
+        .date-text { width: 100%; border: none; background: transparent; text-align: center; font-size: 12px; padding: 3px 0; pointer-events: none; }
         .date-native { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .saldo-box { margin-top: 10px; background: #fff8e0; border: 1px solid #c9a227; border-radius: 4px; padding: 8px 12px; font-weight: bold; font-size: 14px; color: #4a3800; text-align: center; }
+        .card-actions-wrapper { margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        .card-actions-wrapper button { padding: 8px 14px; font-size: 12.5px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; color: white; transition: 0.2s; }
+        .guardar { background: #3d7d17; } .bitacora { background: #e68a2e; } .exportar { background: #2a7de1; } .enviar { background: #34b7f1; } .borrar { background: #c0392b; }
 
-        .saldo-box { margin-top: 10px; background: #fff8e0; border: 1px solid #c9a227;
-            border-radius: 4px; padding: 8px 12px; font-weight: bold;
-            font-size: 14px; color: #4a3800; text-align: center; }
-
-        .card-actions-wrapper { margin-top: 12px; display: flex; gap: 8px;
-            justify-content: center; flex-wrap: wrap; }
-        .card-actions-wrapper button { padding: 8px 14px; font-size: 12.5px;
-            font-weight: bold; border: none; border-radius: 6px; cursor: pointer;
-            color: white; transition: 0.2s; }
-        .guardar { background: #3d7d17; } .bitacora { background: #e68a2e; }
-        .exportar { background: #2a7de1; } .enviar { background: #34b7f1; }
-        .borrar { background: #c0392b; }
-
-        /* Selector de modos flotante */
-        .modo-flotante {
-            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
-            display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
-        }
-        .modo-btn {
-            width: 48px; height: 48px; border-radius: 50%; border: none;
-            font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: 0.2s; background: var(--card-bg); color: var(--text);
-        }
+        .modo-flotante { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        .modo-btn { width: 48px; height: 48px; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: 0.2s; background: var(--card-bg); color: var(--text); }
         .modo-btn.activo { background: var(--primary); color: white; }
-        .modo-opciones {
-            display: none; flex-direction: column; gap: 8px;
-        }
+        .modo-opciones { display: none; flex-direction: column; gap: 8px; }
         .modo-opciones.visible { display: flex; }
 
-        /* Estadísticas */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px; margin-bottom: 20px; }
-        .stat-card { background: var(--card-bg); border-radius: 12px; padding: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--card-bg); border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
         .stat-value { font-size: 24px; font-weight: bold; color: var(--primary); }
         .stat-label { font-size: 12px; color: #888; }
 
-        /* Calculadora */
-        .calc-box { background: var(--card-bg); border-radius: 12px; padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .calc-result { background: #f0f0f0; border-radius: 8px; padding: 12px;
-            margin-top: 12px; font-weight: bold; }
+        .calc-box { background: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .calc-result { background: #f0f0f0; border-radius: 8px; padding: 12px; margin-top: 12px; font-weight: bold; }
         body.dark .calc-result { background: #333; }
         body.sol .calc-result { background: #f5f5f5; border: 1px solid black; }
 
-        /* Modal recibo */
-        .modal-recibo {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            display: flex; align-items: center; justify-content: center; z-index: 999;
-        }
+        .modal-recibo { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 999; }
         .modal-recibo.hidden { display: none; }
-        .recibo-content {
-            background: white; padding: 20px; border-radius: 12px;
-            max-width: 350px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
+        .recibo-content { background: white; padding: 20px; border-radius: 12px; max-width: 350px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+        @media (max-width: 660px) { .card-wrapper { width: 100%; } }
     </style>
 </head>
 <body class="">
 
     <!-- Login Screen -->
-    <div id="loginScreen">
-        <div class="login-panel" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(20,20,30,0.7); border-radius: 18px; padding: 32px; width: 320px;
-            text-align: center; color: white; box-shadow: 0 0 40px rgba(90,200,255,0.25);">
-            <h2>🔐 Mk Prestamos</h2>
-            <label>Correo electrónico</label>
+    <div id="loginScreen" style="position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at 50% 30%, #1c1c26, #05050a); display: flex; align-items: center; justify-content: center;">
+        <div style="background: rgba(20,20,30,0.7); border-radius: 18px; padding: 32px; width: 320px; text-align: center; color: white; box-shadow: 0 0 40px rgba(90,200,255,0.25);">
+            <h2 style="font-family: Georgia, serif;">🔐 Mk Prestamos</h2>
+            <label style="display: block; text-align: left; font-size: 12px; margin-bottom: 4px; color: #aaccee;">Correo</label>
             <input type="email" id="loginEmail" placeholder="tucorreo@gmail.com" style="width: 100%; padding: 10px; margin-bottom: 16px; border-radius: 8px; background: #1a1a2e; color: white; border: 1px solid #5588aa;">
-            <label>Contraseña</label>
+            <label style="display: block; text-align: left; font-size: 12px; margin-bottom: 4px; color: #aaccee;">Contraseña</label>
             <input type="password" id="loginPassword" placeholder="******" style="width: 100%; padding: 10px; margin-bottom: 16px; border-radius: 8px; background: #1a1a2e; color: white; border: 1px solid #5588aa;">
-            <button id="btnLogin" style="width: 100%; padding: 12px; background: #0066cc; color: white; border: none; border-radius: 8px; cursor: pointer;">Ingresar</button>
+            <button id="btnLogin" style="width: 100%; padding: 12px; background: #0066cc; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold;">Ingresar</button>
             <p id="loginError" style="color: #ff8888; min-height: 16px; margin-top: 8px;"></p>
         </div>
     </div>
@@ -304,10 +167,9 @@
         <button class="tab-btn" data-tab="config">⚙️ Config</button>
     </nav>
 
-    <div id="status" style="text-align: center; font-size: 13px; min-height: 16px; margin-bottom: 8px;"></div>
+    <div id="status" style="text-align: center; font-size: 13px; min-height: 16px; margin-bottom: 8px; color: var(--success);"></div>
 
     <main>
-        <!-- Fichas -->
         <section id="tab-fichas" class="tab-pane active">
             <div class="fichas-toolbar">
                 <button onclick="crearTarjeta()" style="padding: 10px 14px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer;">+ Nueva tarjeta</button>
@@ -322,22 +184,20 @@
             <div class="cards-container" id="cardsContainer"></div>
         </section>
 
-        <!-- Panel general -->
         <section id="tab-panel" class="tab-pane">
-            <div class="modal-box" style="max-width:700px; margin: 0 auto; background: var(--card-bg); border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div style="max-width:700px; margin: 0 auto; background: var(--card-bg); border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                 <h2>📊 Panel general</h2>
-                <div class="row"><span>Total prestado</span><b id="pTotalPrestado">$0.00</b></div>
-                <div class="row"><span>Total pendiente</span><b id="pTotalPendiente">$0.00</b></div>
-                <div class="row"><span>Tarjetas activas</span><b id="pTotalActivas">0</b></div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #ccc;"><span>Total prestado</span><b id="pTotalPrestado">$0.00</b></div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #ccc;"><span>Total pendiente</span><b id="pTotalPendiente">$0.00</b></div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #ccc;"><span>Tarjetas activas</span><b id="pTotalActivas">0</b></div>
                 <h3>⏰ Próximos pagos</h3>
                 <div id="pEstados"></div>
                 <h3>🔎 Buscar por nombre</h3>
-                <input type="text" id="pBuscar" placeholder="Escribí un nombre..." oninput="buscarPorNombre(this.value)" style="width:100%; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid #ccc;">
+                <input type="text" id="pBuscar" placeholder="Escribí un nombre..." oninput="buscarPorNombre(this.value)" style="width:100%; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid #ccc; background: var(--card-bg); color: var(--text);">
                 <div id="pResultados"></div>
             </div>
         </section>
 
-        <!-- Estadísticas -->
         <section id="tab-stats" class="tab-pane">
             <div style="max-width:800px; margin:0 auto;">
                 <h2 style="font-family: var(--font-head); margin-bottom: 16px;">📈 Estadísticas</h2>
@@ -347,19 +207,18 @@
             </div>
         </section>
 
-        <!-- Calculadora -->
         <section id="tab-calculadora" class="tab-pane">
             <div class="calc-box" style="max-width:500px; margin:0 auto;">
                 <h2>🧮 Calculadora de préstamos</h2>
                 <div style="display:flex; flex-direction: column; gap: 10px;">
                     <label>Monto del préstamo</label>
-                    <input type="number" id="calcMonto" placeholder="Ej: 1000" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+                    <input type="number" id="calcMonto" placeholder="Ej: 1000" style="padding:8px; border-radius:6px; border:1px solid #ccc; background: var(--card-bg); color: var(--text);">
                     <label>Tasa de interés (%)</label>
-                    <input type="number" id="calcTasa" placeholder="Ej: 20" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+                    <input type="number" id="calcTasa" placeholder="Ej: 20" style="padding:8px; border-radius:6px; border:1px solid #ccc; background: var(--card-bg); color: var(--text);">
                     <label>Plazo (meses)</label>
-                    <input type="number" id="calcPlazo" placeholder="Ej: 6" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+                    <input type="number" id="calcPlazo" placeholder="Ej: 6" style="padding:8px; border-radius:6px; border:1px solid #ccc; background: var(--card-bg); color: var(--text);">
                     <label>Frecuencia de pago</label>
-                    <select id="calcFrecuencia" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+                    <select id="calcFrecuencia" style="padding:8px; border-radius:6px; border:1px solid #ccc; background: var(--card-bg); color: var(--text);">
                         <option value="Semanal">Semanal</option>
                         <option value="Quincenal" selected>Quincenal</option>
                         <option value="Mensual">Mensual</option>
@@ -370,18 +229,16 @@
             </div>
         </section>
 
-        <!-- Configuración -->
         <section id="tab-config" class="tab-pane">
-            <div class="modal-box" style="max-width:420px; margin:0 auto; background: var(--card-bg); border-radius: 10px; padding: 20px;">
+            <div style="max-width:420px; margin:0 auto; background: var(--card-bg); border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                 <h2>⚙️ Configuración</h2>
-                <div class="row"><span>Usuario</span><b id="cfgUserEmail">-</b></div>
-                <div class="row"><span>Tarjetas guardadas</span><b id="cfgTotalCards">0</b></div>
-                <button onclick="cerrarSesion()" style="background: #b5482f; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; margin-top: 12px;">Cerrar sesión</button>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #ccc;"><span>Usuario</span><b id="cfgUserEmail">-</b></div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #ccc;"><span>Tarjetas guardadas</span><b id="cfgTotalCards">0</b></div>
+                <button onclick="cerrarSesion()" style="margin-top: 12px; background: #b5482f; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">Cerrar sesión</button>
             </div>
         </section>
     </main>
 
-    <!-- Selector de modo flotante -->
     <div class="modo-flotante">
         <div class="modo-opciones" id="modoOpciones">
             <button class="modo-btn" onclick="cambiarModo('sol')" title="Modo Sol">☀️</button>
@@ -391,7 +248,6 @@
         <button class="modo-btn" id="modoMainBtn" onclick="toggleModoOpciones()">☀️</button>
     </div>
 
-    <!-- Modal Recibo -->
     <div id="modalRecibo" class="modal-recibo hidden">
         <div class="recibo-content" id="reciboContent"></div>
     </div>
@@ -411,27 +267,39 @@
         const db = firebase.firestore();
         db.enablePersistence().catch(() => {});
 
+        // ===================== DATOS PRECARGADOS =====================
+        const nombresSugeridos = [
+            'María', 'José', 'Juan', 'Ana', 'Luis', 'Carmen', 'Rosa', 'Pedro',
+            'Miguel', 'Sandra', 'Carlos', 'Marta', 'Francisco', 'Gloria', 'Antonio',
+            'Patricia', 'Jorge', 'Blanca', 'Roberto', 'Sonia'
+        ];
+        const lugaresSugeridos = ['IMFICA', 'Call center', 'ISSS', 'Informal'];
+
         // ===================== ESTADO =====================
         let cards = {};
-        let modoActual = localStorage.getItem('prestamos_modo') || 'normal';
-        aplicarModo(modoActual);
+        let siguienteNumeroCache = 1;
+        let saveTimers = {};
+        const loginScreen = document.getElementById('loginScreen');
 
         // ===================== LOGIN =====================
         document.getElementById('btnLogin').addEventListener('click', () => {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
+            if (!email || !password) return document.getElementById('loginError').textContent = 'Completá todos los campos.';
             auth.signInWithEmailAndPassword(email, password)
-                .then(() => document.getElementById('loginScreen').style.display = 'none')
-                .catch(err => document.getElementById('loginError').textContent = err.message);
+                .then(() => loginScreen.style.display = 'none')
+                .catch(err => document.getElementById('loginError').textContent = 'Error: ' + err.message);
         });
 
         auth.onAuthStateChanged(user => {
             if (user) {
-                document.getElementById('loginScreen').style.display = 'none';
+                loginScreen.style.display = 'none';
                 document.getElementById('cfgUserEmail').textContent = user.email;
                 cargarTodo();
             } else {
-                document.getElementById('loginScreen').style.display = 'flex';
+                loginScreen.style.display = 'flex';
+                document.getElementById('cardsContainer').innerHTML = '';
+                cards = {};
             }
         });
 
@@ -456,27 +324,26 @@
             return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear()).slice(-2)}`;
         }
 
-        // ===================== MODO (Sol/Luna/Normal) =====================
+        // ===================== MODO =====================
         function cambiarModo(modo) {
             localStorage.setItem('prestamos_modo', modo);
             aplicarModo(modo);
             document.getElementById('modoOpciones').classList.remove('visible');
         }
-
         function aplicarModo(modo) {
             document.body.classList.remove('dark', 'sol');
             if (modo === 'luna') document.body.classList.add('dark');
             if (modo === 'sol') document.body.classList.add('sol');
             document.getElementById('modoMainBtn').textContent = modo === 'sol' ? '☀️' : modo === 'luna' ? '🌙' : '👩';
-            modoActual = modo;
         }
-
         function toggleModoOpciones() {
             document.getElementById('modoOpciones').classList.toggle('visible');
         }
+        aplicarModo(localStorage.getItem('prestamos_modo') || 'normal');
 
         // ===================== FIRESTORE =====================
         async function cargarTodo() {
+            setStatus('Cargando...');
             try {
                 const snap = await db.collection('tarjetas').get();
                 cards = {};
@@ -488,17 +355,21 @@
                 });
                 const metaSnap = await db.collection('meta').doc('config').get();
                 siguienteNumeroCache = metaSnap.exists ? (metaSnap.data().siguienteNumero || 1) : 1;
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+                setStatus('Error de conexión', true);
+            }
             document.getElementById('totalTarjetas').textContent = Object.keys(cards).length;
-            actualizarPanel();
+            setStatus('');
         }
 
-        let siguienteNumeroCache = 1;
         function guardarTarjeta(id) {
-            clearTimeout(window._saveTimers?.[id]);
-            if (!window._saveTimers) window._saveTimers = {};
-            window._saveTimers[id] = setTimeout(() => {
-                db.collection('tarjetas').doc(id).set(cards[id]).catch(console.error);
+            clearTimeout(saveTimers[id]);
+            saveTimers[id] = setTimeout(() => {
+                if (!cards[id]) return;
+                db.collection('tarjetas').doc(id).set(cards[id])
+                    .then(() => setStatus('Guardado ✓'))
+                    .catch(() => setStatus('Error al guardar', true));
             }, 500);
         }
 
@@ -518,14 +389,17 @@
             renderCard(data);
             guardarTarjeta(data.id);
             document.getElementById('totalTarjetas').textContent = Object.keys(cards).length;
+            setStatus('Tarjeta creada ✓');
         }
 
         function migrarTarjeta(data) {
-            if (data.filas?.length && 'f1' in data.filas[0]) {
-                data.filas = data.filas.map(f => ({
-                    fecha: f.f1 || '', abono: f.a1 || '', siguiente: f.f2 || ''
-                }));
+            if (!data.filas) data.filas = Array.from({ length: 8 }, () => ({ fecha: '', abono: '', siguiente: '' }));
+            if (data.filas.length && 'f1' in data.filas[0]) {
+                data.filas = data.filas.map(f => ({ fecha: f.f1 || '', abono: f.a1 || '', siguiente: f.f2 || '' }));
             }
+            data.fechaInicio = data.fechaInicio || '';
+            data.fechaFin = data.fechaFin || '';
+            if (!data.bitacora) data.bitacora = [];
             return data;
         }
 
@@ -535,14 +409,21 @@
             wrapper.className = 'card-wrapper';
             wrapper.id = 'wrapper_' + data.id;
             const saldo = calcularSaldo(data);
-            const atrasada = estadoTarjeta(data).clase === 'atrasado';
-            if (atrasada) wrapper.classList.add('atrasada');
-            if (saldo <= 0 && data.capital) wrapper.classList.add('pagada');
-
+            if (estadoTarjeta(data).clase === 'atrasado') wrapper.classList.add('atrasada');
             const ultimoPago = obtenerUltimoPago(data);
 
             wrapper.innerHTML = `
                 <div class="pages-container">
+                    <div class="page-bitacora" id="bitacora_${data.id}">
+                        <h3>📖 Bitácora</h3>
+                        <div class="bitacora-summary">
+                            <span>Capital</span><span>${formatoMoneda(parseFloat(data.capital) || 0)}</span>
+                            <span>Total</span><span>${formatoMoneda(calcularTotal(data))}</span>
+                            <span>Saldo</span><span>${formatoMoneda(saldo)}</span>
+                            <span>Cambios</span><span>${data.bitacora.length}</span>
+                        </div>
+                        <div class="bitacora-list">${renderBitacora(data)}</div>
+                    </div>
                     <div class="page-boleta">
                         <div class="card ${saldo <= 0 && data.capital ? 'pagada' : ''}">
                             <div class="ficha-num">N° ${String(data.numero).padStart(3, '0')}</div>
@@ -551,8 +432,20 @@
                                 <div class="coin">$</div>
                             </div>
                             <div class="grid2">
-                                <div class="fld"><label>Señor(a)</label><input data-f="senor" value="${escAttr(data.senor)}"></div>
-                                <div class="fld"><label>Lugar de trabajo</label><input data-f="lugarTrabajo" value="${escAttr(data.lugarTrabajo)}"></div>
+                                <div class="fld">
+                                    <label>Señor(a)</label>
+                                    <input data-f="senor" list="listaNombres" value="${escAttr(data.senor)}" autocomplete="off">
+                                    <datalist id="listaNombres">
+                                        ${nombresSugeridos.map(n => `<option value="${n}">`).join('')}
+                                    </datalist>
+                                </div>
+                                <div class="fld">
+                                    <label>Lugar de trabajo</label>
+                                    <input data-f="lugarTrabajo" list="listaLugares" value="${escAttr(data.lugarTrabajo)}" autocomplete="off">
+                                    <datalist id="listaLugares">
+                                        ${lugaresSugeridos.map(l => `<option value="${l}">`).join('')}
+                                    </datalist>
+                                </div>
                                 <div class="fld"><label>Capital</label><input data-f="capital" type="number" value="${escAttr(data.capital)}"></div>
                                 <div class="fld"><label>Interés %</label><input data-f="interes" type="number" value="${escAttr(data.interes)}"></div>
                                 <div class="fld readonly"><label>TOTAL</label><input data-total value="${formatoMoneda(calcularTotal(data))}" readonly></div>
@@ -571,22 +464,22 @@
                             </div>
                             <table><thead><tr><th>FECHA</th><th>ABONO</th><th>SIGUIENTE</th><th>RESTANTE</th><th></th></tr></thead><tbody>
                                 ${data.filas.map((f, i) => {
-                                    let saldoRun = calcularTotal(data) * 100;
+                                    let saldoRun = Math.round(calcularTotal(data) * 100);
                                     for (let j = 0; j <= i; j++) {
-                                        if (data.filas[j].abono) saldoRun -= Math.round(parseFloat(data.filas[j].abono) * 100);
+                                        if (data.filas[j]?.abono) saldoRun -= Math.round(parseFloat(data.filas[j].abono) * 100);
                                     }
                                     const restante = f.abono ? formatoMoneda(saldoRun / 100) : '';
-                                    return `<tr>
+                                    return `<tr data-row="${i}">
                                         <td>${campoFecha('data-cell="fecha"', f.fecha)}</td>
                                         <td><input data-cell="abono" type="number" step="0.01" value="${escAttr(f.abono)}"></td>
                                         <td>${campoFecha('data-cell="siguiente"', f.siguiente)}</td>
                                         <td class="restante-cell">${restante}</td>
-                                        <td><button onclick="verRecibo('${data.id}', ${i})" style="font-size:10px; padding:2px 5px;">🧾</button></td>
+                                        <td><button onclick="verRecibo('${data.id}', ${i})" style="font-size:10px; padding:2px 5px; background:#5f4479; color:white; border:none; border-radius:3px;">🧾</button></td>
                                     </tr>`;
                                 }).join('')}
                             </tbody></table>
                             <div style="text-align:center; margin-top:6px;">
-                                <button onclick="agregarFila('${data.id}')" style="padding:5px 10px; background:#5f4479; color:#fff; border:none; border-radius:5px;">+ Agregar cuota</button>
+                                <button onclick="agregarFila('${data.id}')" style="padding:5px 10px; background:#5f4479; color:#fff; border:none; border-radius:5px; cursor:pointer;">+ Agregar cuota</button>
                             </div>
                             <div class="saldo-box">Saldo pendiente: ${formatoMoneda(saldo)}</div>
                             ${ultimoPago ? `<div class="ultimo-pago">Último pago: ${ultimoPago}</div>` : ''}
@@ -595,10 +488,12 @@
                 </div>
                 <div class="card-actions-wrapper">
                     <button class="guardar" onclick="guardarBoleta('${data.id}')">💾 Guardar</button>
+                    <button class="bitacora" id="btnBitacora_${data.id}" onclick="toggleBitacora('${data.id}')">✍️ Bitácora</button>
                     <button class="exportar" onclick="exportarImagen('${data.id}')">📤 Exportar</button>
                     <button class="enviar" onclick="exportarMensaje('${data.id}')">📨 Enviar</button>
                     <button class="borrar" onclick="borrarTarjeta('${data.id}')">🗑️ Borrar</button>
                 </div>`;
+
             document.getElementById('cardsContainer').appendChild(wrapper);
             configurarListeners(wrapper, data);
             actualizarTotales(wrapper, data);
@@ -606,29 +501,53 @@
 
         function configurarListeners(wrapper, data) {
             wrapper.querySelectorAll('[data-f]').forEach(inp => {
+                inp.addEventListener('focus', () => { inp.dataset.prev = inp.value; });
                 inp.addEventListener('change', () => {
-                    data[inp.dataset.f] = inp.value;
-                    guardarTarjeta(data.id);
-                    actualizarTotales(wrapper, data);
-                    actualizarEstadoVisual(data);
+                    if (inp.dataset.prev !== inp.value) {
+                        data[inp.dataset.f] = inp.value;
+                        data.bitacora.push({ ts: formatoFechaHora(new Date()), campo: inp.dataset.f, valor: inp.value });
+                        guardarTarjeta(data.id);
+                        actualizarTotales(wrapper, data);
+                        actualizarEstadoVisual(data);
+                    }
                 });
             });
             wrapper.querySelectorAll('[data-cell]').forEach(inp => {
+                inp.addEventListener('focus', () => { inp.dataset.prev = inp.value; });
                 inp.addEventListener('blur', () => {
-                    const row = inp.closest('tr').rowIndex;
-                    const cell = inp.dataset.cell;
-                    data.filas[row][cell] = inp.value;
-                    if (cell === 'abono' && inp.value) {
-                        const fechaInput = inp.closest('tr').querySelector('.date-native');
-                        if (!fechaInput.value) {
-                            const hoy = fechaCorta(new Date());
-                            fechaInput.value = hoy;
-                            data.filas[row].fecha = hoy;
-                        }
+                    const tr = inp.closest('tr');
+                    const rowIdx = parseInt(tr.dataset.row, 10);
+                    const campo = inp.dataset.cell;
+                    const val = inp.value;
+                    if (campo === 'abono' && val && !data.filas[rowIdx].fecha) {
+                        const hoy = fechaCorta(new Date());
+                        data.filas[rowIdx].fecha = hoy;
+                        const fechaInput = tr.querySelector('.date-native');
+                        if (fechaInput) fechaInput.value = fechaDDMMYYaISO(hoy);
+                        const txt = tr.querySelector('.date-text');
+                        if (txt) txt.value = hoy;
                     }
-                    guardarTarjeta(data.id);
-                    actualizarTotales(wrapper, data);
-                    actualizarEstadoVisual(data);
+                    if (inp.dataset.prev !== val) {
+                        data.filas[rowIdx][campo] = val;
+                        data.bitacora.push({ ts: formatoFechaHora(new Date()), campo: `Fila ${rowIdx + 1} - ${campo}`, valor: val });
+                        guardarTarjeta(data.id);
+                        actualizarTotales(wrapper, data);
+                        actualizarEstadoVisual(data);
+                    }
+                });
+            });
+            wrapper.querySelectorAll('.date-native').forEach(inp => {
+                inp.addEventListener('change', () => {
+                    const disp = isoAFechaDDMMYY(inp.value);
+                    const txt = inp.previousElementSibling;
+                    if (txt) txt.value = disp;
+                    const tr = inp.closest('tr');
+                    if (tr) {
+                        const rowIdx = parseInt(tr.dataset.row, 10);
+                        data.filas[rowIdx].fecha = disp;
+                        guardarTarjeta(data.id);
+                        actualizarTotales(wrapper, data);
+                    }
                 });
             });
         }
@@ -638,41 +557,123 @@
             if (totalInput) totalInput.value = formatoMoneda(calcularTotal(data));
             const saldoBox = wrapper.querySelector('.saldo-box');
             if (saldoBox) saldoBox.textContent = 'Saldo pendiente: ' + formatoMoneda(calcularSaldo(data));
-            // Actualizar restantes
-            let saldoRun = calcularTotal(data) * 100;
+            let saldoRun = Math.round(calcularTotal(data) * 100);
             const filas = wrapper.querySelectorAll('tbody tr');
             filas.forEach((tr, i) => {
                 if (data.filas[i]?.abono) saldoRun -= Math.round(parseFloat(data.filas[i].abono) * 100);
                 const celda = tr.querySelector('.restante-cell');
                 if (celda) celda.textContent = data.filas[i]?.abono ? formatoMoneda(saldoRun / 100) : '';
             });
-            wrapper.querySelector('.ultimo-pago').textContent = obtenerUltimoPago(data) ? 'Último pago: ' + obtenerUltimoPago(data) : '';
+            const ultimoPagoEl = wrapper.querySelector('.ultimo-pago');
+            if (ultimoPagoEl) {
+                const up = obtenerUltimoPago(data);
+                ultimoPagoEl.textContent = up ? 'Último pago: ' + up : '';
+            }
+            // Actualizar bitácora si está visible
+            const bitacoraList = document.getElementById('bitacoraList_' + data.id);
+            if (bitacoraList) bitacoraList.innerHTML = renderBitacora(data);
+            const bitacoraSummary = document.getElementById('bitacoraSummary_' + data.id);
+            if (bitacoraSummary) {
+                bitacoraSummary.innerHTML = `
+                    <span>Capital</span><span>${formatoMoneda(parseFloat(data.capital) || 0)}</span>
+                    <span>Total</span><span>${formatoMoneda(calcularTotal(data))}</span>
+                    <span>Saldo</span><span>${formatoMoneda(calcularSaldo(data))}</span>
+                    <span>Cambios</span><span>${data.bitacora.length}</span>`;
+            }
         }
 
         function actualizarEstadoVisual(data) {
             const wrapper = document.getElementById('wrapper_' + data.id);
             if (!wrapper) return;
             const saldo = calcularSaldo(data);
-            wrapper.classList.toggle('pagada', saldo <= 0 && data.capital);
-            const atrasada = estadoTarjeta(data).clase === 'atrasado';
-            wrapper.classList.toggle('atrasada', atrasada);
+            const card = wrapper.querySelector('.card');
+            if (card) card.classList.toggle('pagada', saldo <= 0 && data.capital);
+            wrapper.classList.toggle('atrasada', estadoTarjeta(data).clase === 'atrasado');
         }
 
-        function obtenerUltimoPago(data) {
-            let ultimo = null;
-            data.filas.forEach(f => {
-                if (f.abono && f.fecha) {
-                    const fechaISO = fechaDDMMYYaISO(f.fecha);
-                    if (fechaISO && (!ultimo || fechaISO > ultimo)) ultimo = fechaISO;
+        function renderBitacora(data) {
+            const items = data.bitacora.slice().reverse();
+            if (items.length === 0) return '<div style="color:#8a7a6a; font-style:italic;">Sin cambios registrados.</div>';
+            let grupos = [];
+            let grupoActual = null;
+            items.forEach(it => {
+                const diaKey = it.ts.split('·')[0]?.trim() || '';
+                if (!grupoActual || grupoActual.dia !== diaKey) {
+                    grupoActual = { dia: diaKey, entradas: [] };
+                    grupos.push(grupoActual);
                 }
+                grupoActual.entradas.push(it);
             });
-            return ultimo ? isoAFechaDDMMYY(ultimo) : null;
+            return grupos.map(g => `
+                <div style="font-weight:bold; color:#7a5c6a; margin-top:8px; border-bottom:1px dashed #ccc;">📆 ${g.dia}</div>
+                ${g.entradas.map(it => {
+                    const hora = it.ts.split('·').slice(1).join('·').trim();
+                    return `<div style="padding:4px 0 4px 8px; border-left:2px solid #d4c9b8; margin-left:4px; font-family: 'Courier New', monospace;">
+                        <span style="color:#8a7a6a; font-size:10px;">${hora}</span>
+                        <span style="font-weight:bold;">${it.campo}</span>: ${it.valor}
+                    </div>`;
+                }).join('')}
+            `).join('');
+        }
+
+        function toggleBitacora(id) {
+            const wrapper = document.getElementById('wrapper_' + id);
+            const btn = document.getElementById('btnBitacora_' + id);
+            if (!wrapper || !btn) return;
+            wrapper.classList.toggle('mostrando-bitacora');
+            btn.textContent = wrapper.classList.contains('mostrando-bitacora') ? '📄 Boleta' : '✍️ Bitácora';
+            btn.classList.toggle('active', wrapper.classList.contains('mostrando-bitacora'));
+        }
+
+        function agregarFila(id) {
+            const data = cards[id];
+            if (!data) return;
+            data.filas.push({ fecha: '', abono: '', siguiente: '' });
+            const wrapper = document.getElementById('wrapper_' + id);
+            if (!wrapper) return;
+            wrapper.querySelector('.page-boleta').innerHTML = renderCardInner(data);
+            configurarListeners(wrapper, data);
+            actualizarTotales(wrapper, data);
+            guardarTarjeta(id);
+        }
+
+        function renderCardInner(data) {
+            // Solo la tarjeta, sin el wrapper
+            const saldo = calcularSaldo(data);
+            const ultimoPago = obtenerUltimoPago(data);
+            return `
+                <div class="card ${saldo <= 0 && data.capital ? 'pagada' : ''}">
+                    <div class="ficha-num">N° ${String(data.numero).padStart(3, '0')}</div>
+                    <div class="card-header"><h1 class="card-title">Préstamo Chinita Romero</h1><div class="coin">$</div></div>
+                    <div class="grid2">
+                        <div class="fld"><label>Señor(a)</label><input data-f="senor" list="listaNombres" value="${escAttr(data.senor)}" autocomplete="off"><datalist id="listaNombres">${nombresSugeridos.map(n => `<option value="${n}">`).join('')}</datalist></div>
+                        <div class="fld"><label>Lugar de trabajo</label><input data-f="lugarTrabajo" list="listaLugares" value="${escAttr(data.lugarTrabajo)}" autocomplete="off"><datalist id="listaLugares">${lugaresSugeridos.map(l => `<option value="${l}">`).join('')}</datalist></div>
+                        <div class="fld"><label>Capital</label><input data-f="capital" type="number" value="${escAttr(data.capital)}"></div>
+                        <div class="fld"><label>Interés %</label><input data-f="interes" type="number" value="${escAttr(data.interes)}"></div>
+                        <div class="fld readonly"><label>TOTAL</label><input data-total value="${formatoMoneda(calcularTotal(data))}" readonly></div>
+                        <div class="fld"><label>Cuota</label><div style="display:flex; gap:6px;"><input data-f="cuotaMonto" type="number" value="${escAttr(data.cuotaMonto)}" style="flex:1;"><select data-f="cuotaFrecuencia" style="flex:1;"><option value="Semanal" ${data.cuotaFrecuencia === 'Semanal' ? 'selected' : ''}>Semanal</option><option value="Quincenal" ${data.cuotaFrecuencia === 'Quincenal' ? 'selected' : ''}>Quincenal</option><option value="Mensual" ${data.cuotaFrecuencia === 'Mensual' ? 'selected' : ''}>Mensual</option></select></div></div>
+                        <div class="fld"><label>Fecha inicio</label>${campoFecha('data-f="fechaInicio"', data.fechaInicio)}</div>
+                        <div class="fld"><label>Fecha fin</label>${campoFecha('data-f="fechaFin"', data.fechaFin)}</div>
+                    </div>
+                    <table><thead><tr><th>FECHA</th><th>ABONO</th><th>SIGUIENTE</th><th>RESTANTE</th><th></th></tr></thead><tbody>
+                        ${data.filas.map((f, i) => {
+                            let saldoRun = Math.round(calcularTotal(data) * 100);
+                            for (let j = 0; j <= i; j++) if (data.filas[j]?.abono) saldoRun -= Math.round(parseFloat(data.filas[j].abono) * 100);
+                            const restante = f.abono ? formatoMoneda(saldoRun / 100) : '';
+                            return `<tr data-row="${i}"><td>${campoFecha('data-cell="fecha"', f.fecha)}</td><td><input data-cell="abono" type="number" step="0.01" value="${escAttr(f.abono)}"></td><td>${campoFecha('data-cell="siguiente"', f.siguiente)}</td><td class="restante-cell">${restante}</td><td><button onclick="verRecibo('${data.id}', ${i})" style="font-size:10px; padding:2px 5px; background:#5f4479; color:white; border:none; border-radius:3px;">🧾</button></td></tr>`;
+                        }).join('')}
+                    </tbody></table>
+                    <div style="text-align:center; margin-top:6px;"><button onclick="agregarFila('${data.id}')" style="padding:5px 10px; background:#5f4479; color:#fff; border:none; border-radius:5px;">+ Agregar cuota</button></div>
+                    <div class="saldo-box">Saldo pendiente: ${formatoMoneda(saldo)}</div>
+                    ${ultimoPago ? `<div class="ultimo-pago">Último pago: ${ultimoPago}</div>` : ''}
+                </div>`;
         }
 
         function verRecibo(id, rowIndex) {
             const data = cards[id];
+            if (!data) return;
             const fila = data.filas[rowIndex];
-            if (!fila.abono) return alert('Esa fila no tiene abono registrado.');
+            if (!fila?.abono) return alert('Esa fila no tiene abono registrado.');
             const contenido = `
                 <h3>🧾 Recibo de pago</h3>
                 <p><strong>Cliente:</strong> ${data.senor || 'Sin nombre'}</p>
@@ -680,57 +681,178 @@
                 <p><strong>Fecha:</strong> ${fila.fecha}</p>
                 <p><strong>Abono:</strong> ${formatoMoneda(parseFloat(fila.abono))}</p>
                 <p><strong>Saldo pendiente:</strong> ${formatoMoneda(calcularSaldo(data))}</p>
-                <button onclick="document.getElementById('modalRecibo').classList.add('hidden')" style="margin-top:10px; padding:6px 12px;">Cerrar</button>
-            `;
+                <button onclick="document.getElementById('modalRecibo').classList.add('hidden')" style="margin-top:10px; padding:6px 12px;">Cerrar</button>`;
             document.getElementById('reciboContent').innerHTML = contenido;
             document.getElementById('modalRecibo').classList.remove('hidden');
+        }
+
+        // ===================== ACCIONES =====================
+        async function guardarBoleta(id) {
+            guardarTarjeta(id);
+            setStatus('Guardado ✓');
+        }
+
+        async function borrarTarjeta(id) {
+            if (!confirm('¿Seguro que querés borrar esta tarjeta? No se puede deshacer.')) return;
+            await db.collection('tarjetas').doc(id).delete();
+            delete cards[id];
+            const wrapper = document.getElementById('wrapper_' + id);
+            if (wrapper) wrapper.remove();
+            document.getElementById('totalTarjetas').textContent = Object.keys(cards).length;
+            setStatus('Tarjeta borrada');
+        }
+
+        async function exportarImagen(id) {
+            const wrapper = document.getElementById('wrapper_' + id);
+            const boleta = wrapper.querySelector('.page-boleta .card');
+            setStatus('Generando imagen...');
+            try {
+                const canvas = await html2canvas(boleta, { backgroundColor: '#f0c9e6', scale: 2 });
+                canvas.toBlob(async (blob) => {
+                    const data = cards[id];
+                    const nombreArchivo = `ficha_${String(data.numero).padStart(3, '0')}_${(data.senor || 'sin_nombre').replace(/\s+/g, '_')}.png`;
+                    const file = new File([blob], nombreArchivo, { type: 'image/png' });
+                    if (navigator.canShare?.({ files: [file] })) {
+                        try { await navigator.share({ files: [file] }); return; } catch (e) {}
+                    }
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = nombreArchivo;
+                    a.click(); URL.revokeObjectURL(url);
+                    setStatus('Imagen descargada ✓');
+                }, 'image/png');
+            } catch (e) { setStatus('Error al generar imagen', true); }
+        }
+
+        function exportarMensaje(id) {
+            const data = cards[id];
+            const texto = `*Mk Prestamos - Chinita Romero*\nFicha N°: ${String(data.numero).padStart(3, '0')}\nSeñor(a): ${data.senor || '-'}\nCapital: ${formatoMoneda(parseFloat(data.capital) || 0)}\nTotal a pagar: ${formatoMoneda(calcularTotal(data))}\nSaldo pendiente: ${formatoMoneda(calcularSaldo(data))}`;
+            if (navigator.share) { navigator.share({ text: texto }).catch(() => {}); }
+            else window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
         }
 
         // ===================== UTILIDADES =====================
         function formatoMoneda(n) { return '$' + (isNaN(n) ? 0 : n).toLocaleString('es-HN', { minimumFractionDigits: 2 }); }
         function calcularTotal(data) { const cap = parseFloat(data.capital) || 0; const int = parseFloat(data.interes) || 0; return cap + (cap * int / 100); }
-        function calcularSaldo(data) { let abonos = 0; data.filas.forEach(f => { if (f.abono) abonos += parseFloat(f.abono); }); return calcularTotal(data) - abonos; }
-
+        function calcularSaldo(data) { let abonos = 0; data.filas.forEach(f => { if (f.abono) abonos += parseFloat(f.abono); }); return Math.max(0, calcularTotal(data) - abonos); }
+        function obtenerUltimoPago(data) {
+            let ultimo = null;
+            data.filas.forEach(f => { if (f.abono && f.fecha) { const iso = fechaDDMMYYaISO(f.fecha); if (iso && (!ultimo || iso > ultimo)) ultimo = iso; } });
+            return ultimo ? isoAFechaDDMMYY(ultimo) : null;
+        }
         function estadoTarjeta(data) {
             const saldo = calcularSaldo(data);
             if (saldo <= 0 && data.capital) return { texto: 'Pagado', clase: 'pagado' };
-            // lógica simplificada
-            return { texto: 'Activo', clase: 'al-dia' };
+            const primera = primeraFechaCobro(data);
+            const hoy = new Date();
+            if (primera && hoy < primera) return { texto: 'Aún no inicia cobro', clase: 'espera' };
+            let proxima = null;
+            data.filas.forEach(f => { if (f.siguiente) { const iso = fechaDDMMYYaISO(f.siguiente); if (iso) proxima = new Date(iso + 'T00:00:00'); } });
+            if (!proxima) proxima = primera;
+            if (!proxima) return { texto: 'Sin fecha', clase: 'espera' };
+            const dias = Math.round((new Date() - proxima) / 86400000);
+            return dias > 0 ? { texto: `Atrasado ${Math.abs(dias)}d`, clase: 'atrasado' } : { texto: `Al día (${Math.abs(dias)}d)`, clase: 'al-dia' };
         }
-
+        function primeraFechaCobro(data) {
+            const iniISO = fechaDDMMYYaISO(data.fechaInicio);
+            if (!iniISO) return null;
+            const d = new Date(iniISO + 'T00:00:00');
+            d.setDate(d.getDate() + (data.cuotaFrecuencia === 'Semanal' ? 7 : data.cuotaFrecuencia === 'Mensual' ? 30 : 15));
+            return d;
+        }
         function campoFecha(attrs, value) {
-            return `<div class="date-field"><input type="text" class="date-text" readonly value="${escAttr(value)}"><input type="date" class="date-native" ${attrs} value="${value ? fechaDDMMYYaISO(value) : ''}"></div>`;
+            return `<div class="date-field"><input type="text" class="date-text" readonly value="${escAttr(value || '')}"><input type="date" class="date-native" ${attrs} value="${value ? fechaDDMMYYaISO(value) : ''}"></div>`;
         }
-
         function fechaDDMMYYaISO(str) {
-            const m = String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+            const m = String(str || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
             if (!m) return '';
             const yy = parseInt(m[3]); const yyyy = yy <= 50 ? 2000 + yy : 1900 + yy;
             return `${yyyy}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
         }
         function isoAFechaDDMMYY(iso) {
-            const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
             return m ? `${m[3]}/${m[2]}/${m[1].slice(-2)}` : '';
         }
+        function escAttr(s) { return String(s || '').replace(/"/g, '&quot;'); }
 
-        // ===================== PANEL / ESTADÍSTICAS =====================
+        function setStatus(msg, isError) {
+            const el = document.getElementById('status');
+            el.textContent = msg;
+            el.style.color = isError ? '#b5482f' : '#4a7c2f';
+            clearTimeout(setStatus._t);
+            setStatus._t = setTimeout(() => { el.textContent = ''; }, 2500);
+        }
+
+        // ===================== PESTAÑAS =====================
+        function cambiarPestana(nombre) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === nombre));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + nombre));
+            if (nombre === 'panel') actualizarPanel();
+            if (nombre === 'stats') actualizarEstadisticas();
+            if (nombre === 'config') document.getElementById('cfgTotalCards').textContent = Object.keys(cards).length;
+        }
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => cambiarPestana(btn.dataset.tab)));
+
         function actualizarPanel() {
-            let totalPrestado = 0, totalPendiente = 0;
+            let tp = 0, tpe = 0, act = 0;
             Object.values(cards).forEach(d => {
-                totalPrestado += parseFloat(d.capital) || 0;
-                totalPendiente += calcularSaldo(d);
+                tp += parseFloat(d.capital) || 0;
+                tpe += calcularSaldo(d);
+                if (calcularSaldo(d) > 0) act++;
             });
-            document.getElementById('pTotalPrestado').textContent = formatoMoneda(totalPrestado);
-            document.getElementById('pTotalPendiente').textContent = formatoMoneda(totalPendiente);
-            document.getElementById('pTotalActivas').textContent = Object.keys(cards).length;
+            document.getElementById('pTotalPrestado').textContent = formatoMoneda(tp);
+            document.getElementById('pTotalPendiente').textContent = formatoMoneda(tpe);
+            document.getElementById('pTotalActivas').textContent = act;
+            const cont = document.getElementById('pEstados');
+            const lista = Object.values(cards).sort((a, b) => {
+                const ea = estadoTarjeta(a), eb = estadoTarjeta(b);
+                const orden = { atrasado: 0, 'al-dia': 1, espera: 2, pagado: 3 };
+                return (orden[ea.clase] || 0) - (orden[eb.clase] || 0);
+            });
+            cont.innerHTML = lista.length === 0 ? '<div style="color:#888;">No hay tarjetas.</div>' :
+                lista.map(d => {
+                    const e = estadoTarjeta(d);
+                    return `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px dotted #ccc;">
+                        <span>Ficha ${String(d.numero).padStart(3, '0')} — ${d.senor || 'Sin nombre'}</span>
+                        <span style="font-weight:bold; color:${e.clase === 'atrasado' ? 'red' : e.clase === 'al-dia' ? 'green' : '#888'};">${e.texto}</span>
+                    </div>`;
+                }).join('');
+            document.getElementById('pBuscar').value = '';
+            document.getElementById('pResultados').innerHTML = '';
+        }
 
-            // Estadísticas
+        function buscarPorNombre(texto) {
+            const cont = document.getElementById('pResultados');
+            const q = texto.trim().toLowerCase();
+            if (!q) { cont.innerHTML = ''; return; }
+            const resultados = Object.values(cards).filter(d => (d.senor || '').toLowerCase().includes(q));
+            cont.innerHTML = resultados.length === 0 ? '<div style="color:#888;">Sin resultados.</div>' :
+                resultados.map(d => `<div style="padding:6px; border-bottom:1px dotted #ccc; cursor:pointer;" onclick="irATarjeta('${d.id}')">Ficha ${String(d.numero).padStart(3, '0')} — ${d.senor || 'Sin nombre'} — ${formatoMoneda(calcularSaldo(d))}</div>`).join('');
+        }
+
+        function irATarjeta(id) {
+            cambiarPestana('fichas');
+            setTimeout(() => {
+                const wrapper = document.getElementById('wrapper_' + id);
+                if (wrapper) {
+                    wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const card = wrapper.querySelector('.card');
+                    if (card) { card.classList.add('highlight-flash'); setTimeout(() => card.classList.remove('highlight-flash'), 1500); }
+                }
+            }, 100);
+        }
+
+        function actualizarEstadisticas() {
+            let tp = 0, tpe = 0;
+            Object.values(cards).forEach(d => {
+                tp += parseFloat(d.capital) || 0;
+                tpe += calcularSaldo(d);
+            });
             document.getElementById('statsGrid').innerHTML = `
-                <div class="stat-card"><div class="stat-value">${formatoMoneda(totalPrestado)}</div><div class="stat-label">Total prestado</div></div>
-                <div class="stat-card"><div class="stat-value">${formatoMoneda(totalPendiente)}</div><div class="stat-label">Pendiente</div></div>
-                <div class="stat-card"><div class="stat-value">${formatoMoneda(totalPrestado - totalPendiente)}</div><div class="stat-label">Recaudado</div></div>
-                <div class="stat-card"><div class="stat-value">${Object.keys(cards).length}</div><div class="stat-label">Clientes activos</div></div>
-            `;
+                <div class="stat-card"><div class="stat-value">${formatoMoneda(tp)}</div><div class="stat-label">Total prestado</div></div>
+                <div class="stat-card"><div class="stat-value">${formatoMoneda(tpe)}</div><div class="stat-label">Pendiente</div></div>
+                <div class="stat-card"><div class="stat-value">${formatoMoneda(tp - tpe)}</div><div class="stat-label">Recaudado</div></div>
+                <div class="stat-card"><div class="stat-value">${Object.keys(cards).length}</div><div class="stat-label">Clientes</div></div>`;
             dibujarGrafico();
         }
 
@@ -738,8 +860,7 @@
             const canvas = document.getElementById('ingresosChart');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            const ingresosMensuales = new Array(6).fill(0);
-            // Calcular ingresos por mes (simplificado)
+            const ingresos = new Array(6).fill(0);
             Object.values(cards).forEach(d => {
                 d.filas.forEach(f => {
                     if (f.abono && f.fecha) {
@@ -747,24 +868,22 @@
                         if (iso) {
                             const fecha = new Date(iso);
                             const mesIndex = 5 - (new Date().getMonth() - fecha.getMonth() + 12) % 12;
-                            if (mesIndex >= 0 && mesIndex < 6) ingresosMensuales[mesIndex] += parseFloat(f.abono);
+                            if (mesIndex >= 0 && mesIndex < 6) ingresos[mesIndex] += parseFloat(f.abono);
                         }
                     }
                 });
             });
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const max = Math.max(...ingresosMensuales, 1);
-            const anchoBarra = 40;
-            ingresosMensuales.forEach((val, i) => {
+            const max = Math.max(...ingresos, 1);
+            ingresos.forEach((val, i) => {
                 const altura = (val / max) * 150;
                 ctx.fillStyle = '#5f4479';
-                ctx.fillRect(i * 70 + 20, 180 - altura, anchoBarra, altura);
+                ctx.fillRect(i * 70 + 20, 180 - altura, 40, altura);
                 ctx.fillStyle = '#000';
                 ctx.fillText(formatoMoneda(val), i * 70 + 20, 180 - altura - 5);
             });
         }
 
-        // ===================== CALCULADORA =====================
         function calcularCuota() {
             const monto = parseFloat(document.getElementById('calcMonto').value);
             const tasa = parseFloat(document.getElementById('calcTasa').value);
@@ -780,15 +899,28 @@
                 default: numPagos = plazo;
             }
             const cuota = totalPagar / numPagos;
-            document.getElementById('calcResultado').style.display = 'block';
-            document.getElementById('calcResultado').innerHTML = `
-                <p>Total a pagar: <strong>${formatoMoneda(totalPagar)}</strong></p>
-                <p>Número de pagos: <strong>${numPagos}</strong> (${frecuencia})</p>
-                <p>Cuota: <strong>${formatoMoneda(cuota)}</strong></p>
-            `;
+            const res = document.getElementById('calcResultado');
+            res.style.display = 'block';
+            res.innerHTML = `<p>Total a pagar: <strong>${formatoMoneda(totalPagar)}</strong></p><p>Número de pagos: <strong>${numPagos}</strong> (${frecuencia})</p><p>Cuota: <strong>${formatoMoneda(cuota)}</strong></p>`;
         }
 
-        function escAttr(s) { return String(s || '').replace(/"/g, '&quot;'); }
+        function reordenarTarjetas(criterio) {
+            const cont = document.getElementById('cardsContainer');
+            const lista = Object.values(cards);
+            lista.sort((a, b) => {
+                if (criterio === 'nombre') return (a.senor || '').localeCompare(b.senor || '', 'es', { sensitivity: 'base' });
+                if (criterio === 'saldo') return calcularSaldo(b) - calcularSaldo(a);
+                if (criterio === 'atrasados') {
+                    const o = { atrasado: 0, 'al-dia': 1, espera: 2, pagado: 3 };
+                    return (o[estadoTarjeta(a).clase] || 0) - (o[estadoTarjeta(b).clase] || 0);
+                }
+                return a.numero - b.numero;
+            });
+            lista.forEach(d => {
+                const wrapper = document.getElementById('wrapper_' + d.id);
+                if (wrapper) cont.appendChild(wrapper);
+            });
+        }
     </script>
 </body>
 </html>
