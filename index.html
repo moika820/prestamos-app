@@ -1,1119 +1,794 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Mk Prestamos">
-<meta name="theme-color" content="#2b2b2b">
-<title>Mk Prestamos</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mk Prestamos">
+    <meta name="theme-color" content="#2b2b2b">
+    <title>Mk Prestamos</title>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<style>
-  * { box-sizing: border-box; }
-  :root {
-    --font-head: Georgia, 'Times New Roman', serif;
-    --font-data: Arial, Helvetica, sans-serif;
-  }
-  body {
-    font-family: var(--font-data);
-    background: #e8e8e8;
-    margin: 0;
-    padding: 16px;
-    transition: background 0.25s;
-  }
-  body.dark { background: #17171c; }
-  body.dark .fichas-toolbar button { background: #4a3b63; }
-  body.dark .fichas-toolbar button:hover { background: #3a2d4f; }
-  body.dark #clock { background: #111; }
-  body.dark #status { color: #cfcfcf; }
-  body.dark .modal-box { background:#242430; color:#e8e8ef; border-color:#7a5c99; }
-  body.dark .modal-box .row { border-color:#444455; }
-  body.dark .modal-box h2 { color:#c9a8ff; }
-  body.dark .modal-box input[type="text"], body.dark .modal-box input[type="password"], body.dark .modal-box input[type="email"] { background:#1b1b24; color:#eee; border-color:#555; }
-  body.dark .search-result, body.dark .empty-log { color:#ccc; }
-  body.dark .search-result:hover { background: rgba(200,170,255,0.12); }
-  body.dark #ordenSelect { background:#242430; color:#eee; }
-  body.dark .card { box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-  body.dark .card-actions-wrapper button.guardar { background: #2d6b1a; }
-  body.dark .card-actions-wrapper button.bitacora { background: #c47a20; }
-  body.dark .card-actions-wrapper button.exportar { background: #1a5fb8; }
-  body.dark .card-actions-wrapper button.enviar { background: #1a8fc4; }
-  body.dark .card-actions-wrapper button.borrar { background: #a03228; }
-  body.dark .app-header { background:#242430; }
-  body.dark .app-header h1 { color:#e8e0f5; }
-  body.dark .app-header #clock {
-    background: #ffffff;
-    color: #000000;
-    border-color: #888;
-  }
-  body.dark .tabs { background:#242430; }
-  body.dark .tab-btn { color:#aaa; }
-  body.dark .tab-btn.active { color:#c9a8ff; border-bottom-color:#c9a8ff; }
-  body.dark #ordenSelect { background:#242430; color:#eee; border-color:#555; }
+    <!-- PWA Manifest (inline) -->
+    <script>
+        const manifest = {
+            name: "Mk Prestamos",
+            short_name: "MkPrestamos",
+            start_url: ".",
+            display: "standalone",
+            background_color: "#ffffff",
+            theme_color: "#5f4479",
+            icons: [
+                {
+                    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>",
+                    sizes: "100x100",
+                    type: "image/svg+xml"
+                }
+            ]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        const manifestURL = URL.createObjectURL(blob);
+        document.getElementById('manifestLink').href = manifestURL;
+    </script>
+    <link rel="manifest" id="manifestLink">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
 
-  .app-header {
-    display:flex; justify-content:space-between; align-items:center;
-    background:#fff; padding:14px 22px; border-radius:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.12); margin-bottom:14px;
-  }
-  .app-header h1 {
-    margin:0; font-family: var(--font-head); font-size:21px; color:#3a2d4f; line-height:1.25;
-  }
-  .app-header h1 span { display:block; font-size:13px; color:#7a5c99; font-weight:normal; }
-  .app-header #clock {
-    font-family: var(--font-data);
-    font-size: 13px;
-    background: #ffffff;
-    color: #000000;
-    font-weight: bold;
-    font-style: italic;
-    padding: 6px 14px;
-    border-radius: 6px;
-    letter-spacing: 0.5px;
-    border: 1px solid #ccc;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    white-space: nowrap;
-  }
+    <style>
+        :root {
+            --font-head: Georgia, 'Times New Roman', serif;
+            --font-data: Arial, Helvetica, sans-serif;
+            --bg: #e8e8e8;
+            --card-bg: #ffffff;
+            --text: #1a1a2e;
+            --primary: #5f4479;
+            --accent: #f0c9e6;
+            --border: #d4c9b8;
+            --danger: #b5482f;
+            --success: #3d7d17;
+        }
 
-  .tabs {
-    display:flex; gap:2px; background:#fff; padding:0 14px;
-    border-radius:8px; margin-bottom:18px; box-shadow:0 1px 4px rgba(0,0,0,0.08);
-    overflow-x:auto;
-  }
-  .tab-btn {
-    border:none; background:transparent; padding:13px 16px; font-size:13.5px; font-weight:bold;
-    color:#777; cursor:pointer; border-bottom:3px solid transparent; white-space:nowrap;
-    font-family: var(--font-data);
-  }
-  .tab-btn:hover { color:#5f4479; }
-  .tab-btn.active { color:#5f4479; border-bottom-color:#7a5c99; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .tab-pane { display:none; }
-  .tab-pane.active { display:block; }
+        body {
+            font-family: var(--font-data);
+            background: var(--bg);
+            color: var(--text);
+            padding: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 100vh;
+        }
 
-  .fichas-toolbar {
-    display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap;
-    background:#fff; padding:12px 16px; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08);
-  }
-  body.dark .fichas-toolbar { background:#242430; }
-  .fichas-toolbar button, .fichas-toolbar select { padding:10px 14px; }
-  #ordenSelect {
-    padding: 9px 10px; font-size: 13px; border-radius: 6px; border: 1px solid #999;
-    background: #fff; color: #333; font-weight: bold;
-  }
-  #status {
-    max-width: 700px;
-    margin: 0 auto 12px auto;
-    text-align: center;
-    font-size: 13px;
-    color: #555;
-    min-height: 16px;
-  }
-  .cards-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-  }
+        /* Modo oscuro (Luna) */
+        body.dark {
+            --bg: #17171c;
+            --card-bg: #242430;
+            --text: #e8e8ef;
+            --primary: #c9a8ff;
+            --accent: #2d1f3a;
+            --border: #444455;
+            --danger: #ff6b6b;
+            --success: #4caf50;
+        }
 
-  .card-wrapper {
-    width: 640px;
-    max-width: 95vw;
-    position: relative;
-  }
+        /* Modo sol (máximo contraste) */
+        body.sol {
+            --bg: #ffffff;
+            --card-bg: #ffffff;
+            --text: #000000;
+            --primary: #000000;
+            --accent: #fffde0;
+            --border: #000000;
+            --danger: #cc0000;
+            --success: #006600;
+        }
 
-  .pages-container {
-    position: relative;
-    width: 100%;
-    min-height: 420px;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+        body.sol .card { border: 2px solid black; }
+        body.sol .card-actions-wrapper button { border: 1px solid black; }
+        body.sol .modal-box { background: #ffffff; color: #000; border-color: #000; }
 
-  .page-boleta {
-    position: relative;
-    z-index: 2;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s ease;
-    transform-origin: left center;
-  }
-  .card-wrapper.mostrando-bitacora .page-boleta {
-    transform: perspective(1200px) rotateY(-8deg) translateX(-20px) scale(0.97);
-    box-shadow: -8px 8px 30px rgba(0,0,0,0.25);
-    z-index: 1;
-  }
+        .app-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card-bg); padding: 14px 22px; border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12); margin-bottom: 14px;
+        }
+        .app-header h1 { font-family: var(--font-head); font-size: 21px; color: var(--primary); }
+        .app-header h1 span { display: block; font-size: 13px; color: #7a5c99; }
 
-  .page-bitacora {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1;
-    opacity: 0;
-    transform: perspective(1200px) rotateY(10deg) translateX(30px) scale(0.95);
-    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s;
-    pointer-events: none;
-    background: #f5f0e8;
-    border-radius: 4px;
-    border: 3px solid #d4c9b8;
-    min-height: 420px;
-    padding: 20px 24px;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6), 0 4px 20px rgba(0,0,0,0.1);
-  }
-  .page-bitacora::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: repeating-linear-gradient(
-      transparent,
-      transparent 27px,
-      rgba(180, 160, 140, 0.15) 27px,
-      rgba(180, 160, 140, 0.15) 28px
-    );
-    pointer-events: none;
-    border-radius: 4px;
-  }
-  .page-bitacora::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 40px;
-    bottom: 0;
-    width: 2px;
-    background: rgba(200, 50, 50, 0.15);
-    pointer-events: none;
-  }
-  .card-wrapper.mostrando-bitacora .page-bitacora {
-    opacity: 1;
-    transform: perspective(1200px) rotateY(0deg) translateX(0px) scale(1);
-    z-index: 3;
-    pointer-events: auto;
-  }
+        #clock {
+            font-size: 13px; background: #fff; color: #000; font-weight: bold;
+            padding: 6px 14px; border-radius: 6px; border: 1px solid #ccc;
+            white-space: nowrap;
+        }
 
-  .page-bitacora h3 {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 18px;
-    color: #3a2d4f;
-    margin: 0 0 4px 0;
-    padding-bottom: 2px;
-    border-bottom: 2px solid #d4c9b8;
-    font-style: italic;
-  }
-  .page-bitacora .back-sub {
-    font-size: 12px;
-    color: #8a7a6a;
-    margin-bottom: 12px;
-    font-style: italic;
-  }
+        .tabs {
+            display: flex; gap: 2px; background: var(--card-bg); padding: 0 14px;
+            border-radius: 8px; margin-bottom: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .tab-btn {
+            border: none; background: transparent; padding: 13px 16px;
+            font-size: 13.5px; font-weight: bold; color: #777; cursor: pointer;
+            border-bottom: 3px solid transparent; white-space: nowrap;
+            font-family: var(--font-data);
+        }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-  .page-bitacora .bitacora-summary {
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px 16px;
-    background: rgba(255,248,240,0.7);
-    border: 1px solid #d4c9b8;
-    border-radius: 6px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    font-size: 12px;
-    font-family: 'Courier New', monospace;
-  }
-  .page-bitacora .bitacora-summary .k { color:#6b5a4a; }
-  .page-bitacora .bitacora-summary .v { font-weight:bold; color:#2b2b2b; text-align:right; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
 
-  .page-bitacora .bitacora-list {
-    font-size: 12px;
-    max-height: 300px;
-    overflow-y: auto;
-    background: rgba(255,248,240,0.3);
-    border-radius: 4px;
-    padding: 2px 8px 4px 8px;
-    font-family: 'Courier New', monospace;
-  }
-  .page-bitacora .bitacora-day-label {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 11px;
-    font-weight: bold;
-    color: #7a5c6a;
-    margin: 8px 0 2px 0;
-    padding-bottom: 2px;
-    border-bottom: 1px dashed #d4c9b8;
-    font-style: italic;
-  }
-  .page-bitacora .bitacora-item {
-    display:flex;
-    gap: 8px;
-    align-items: flex-start;
-    padding: 4px 0 4px 8px;
-    border-left: 2px solid #d4c9b8;
-    margin-left: 4px;
-  }
-  .page-bitacora .bitacora-item .ico { font-size: 13px; line-height:1.3; }
-  .page-bitacora .bitacora-item .txt { flex:1; }
-  .page-bitacora .bitacora-item .ts { color:#8a7a6a; font-size: 10px; display:block; }
-  .page-bitacora .bitacora-item .campo { color:#7a5c6a; font-weight:bold; }
-  .page-bitacora .empty-log { color:#8a7a6a; font-style:italic; font-size:13px; }
+        .fichas-toolbar {
+            display: flex; gap: 10px; align-items: center; margin-bottom: 16px;
+            flex-wrap: wrap; background: var(--card-bg); padding: 12px 16px;
+            border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        #ordenSelect {
+            padding: 9px 10px; font-size: 13px; border-radius: 6px;
+            border: 1px solid #999; background: var(--card-bg); color: var(--text);
+        }
 
-  .card {
-    background: #f0c9e6;
-    border: 3px solid #e8c144;
-    border-radius: 4px;
-    padding: 16px 20px 20px 20px;
-    position: relative;
-  }
-  .card .card-header h1.card-title { color: #2b2b2b; }
-  .card .ficha-num { color: #5f4479; background:#fff; }
-  .card .coin { background: radial-gradient(circle at 35% 35%, #8bd050, #4c9a1f); color:#f5d000; border-color:#3d7d17; }
-  .card .fld { color:#2b2b2b; }
-  .card .fld label { color:#5a4a4a; }
-  .card .fld input, .card .fld select { color:#222; border-bottom-color:#4a4a4a; }
-  .card table { background:#f0c9e6; }
-  .card th, .card td { border-color:#333; }
-  .card td.restante-cell { color:#4a3800; background: rgba(255,248,224,0.6); }
-  .card .saldo-box { background:#fff8e0; border-color:#c9a227; color:#4a3800; }
-  .card .date-text { color:#222; }
+        .cards-container { display: flex; flex-direction: column; align-items: center; gap: 30px; }
 
-  .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-  .card-title { font-family: Georgia, 'Times New Roman', serif; font-size: 24px; color: #2b2b2b; margin: 0; }
-  .ficha-num { font-size: 13px; font-weight: bold; color: #5f4479; background:#fff; border-radius:4px; padding:3px 8px; display:inline-block; margin-bottom:6px; }
-  .coin { width: 46px; height: 46px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #8bd050, #4c9a1f); display:flex; align-items:center; justify-content:center; color:#f5d000; font-weight:bold; font-size:22px; border:2px solid #3d7d17; flex-shrink:0; }
+        .card-wrapper {
+            width: 640px; max-width: 95vw; position: relative;
+            transition: box-shadow 0.3s;
+        }
+        .card-wrapper.atrasada {
+            box-shadow: 0 0 15px 3px rgba(255,0,0,0.5);
+            border-radius: 4px;
+        }
 
-  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; margin: 8px 0; }
-  .fld { font-size: 13px; font-weight: bold; color:#2b2b2b; }
-  .fld label { display:block; font-size:11px; color:#5a4a4a; font-weight:normal; margin-bottom:1px; }
-  .fld input, .fld select {
-    width: 100%;
-    border: none;
-    border-bottom: 1px dashed #4a4a4a;
-    background: transparent;
-    font-size: 14px;
-    font-weight: bold;
-    color: #222;
-    padding: 2px 0;
-  }
-  .fld input:focus, .fld select:focus { outline: none; background: rgba(255,255,255,0.35); }
-  .fld.readonly input { color:#444; font-style: italic; }
+        .pages-container { position: relative; width: 100%; min-height: 420px; }
+        .page-boleta {
+            position: relative; z-index: 2; transition: transform 0.5s;
+            transform-origin: left center;
+        }
+        .card-wrapper.mostrando-bitacora .page-boleta {
+            transform: perspective(1200px) rotateY(-8deg) translateX(-20px) scale(0.97);
+            box-shadow: -8px 8px 30px rgba(0,0,0,0.25);
+            z-index: 1;
+        }
 
-  table { width: 100%; border-collapse: collapse; margin-top: 12px; background:#f0c9e6; }
-  th, td { border: 1px solid #333; text-align: center; font-size: 12px; padding: 3px 1px; }
-  th { font-weight: bold; padding: 5px 1px; font-family: var(--font-head); font-size: 12.5px; letter-spacing: 0.3px; }
-  td input {
-    width: 100%; border: none; background: transparent; text-align:center;
-    font-size: 12px; padding: 3px 0; font-family: var(--font-data);
-  }
-  td input:focus { outline:none; background: rgba(255,255,255,0.5); }
-  td.restante-cell { font-weight:bold; color:#4a3800; background: rgba(255,248,224,0.6); }
+        .page-bitacora {
+            position: absolute; top: 0; left: 0; width: 100%; z-index: 1;
+            opacity: 0; transform: perspective(1200px) rotateY(10deg) translateX(30px) scale(0.95);
+            transition: opacity 0.4s, transform 0.5s; pointer-events: none;
+            background: #f5f0e8; border-radius: 4px; border: 3px solid var(--border);
+            min-height: 420px; padding: 20px 24px;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6), 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .card-wrapper.mostrando-bitacora .page-bitacora {
+            opacity: 1; transform: perspective(1200px) rotateY(0deg) translateX(0px) scale(1);
+            z-index: 3; pointer-events: auto;
+        }
 
-  .date-field { position: relative; width: 100%; }
-  .date-text {
-    width: 100%; border: none; background: transparent; text-align:center;
-    font-size: 12px; padding: 3px 0; font-family: var(--font-data); cursor:pointer;
-    color:#222; pointer-events: none;
-  }
-  .fld .date-text { text-align:left; font-size:14px; font-weight:bold; border-bottom:1px dashed #4a4a4a; }
-  .date-native {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    opacity: 0; cursor: pointer; border:none; padding:0; margin:0;
-  }
+        .page-bitacora h3 { font-family: var(--font-head); color: #3a2d4f; }
+        .bitacora-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px;
+            background: rgba(255,248,240,0.7); border: 1px solid var(--border);
+            border-radius: 6px; padding: 8px 12px; margin-bottom: 12px;
+            font-size: 12px; font-family: 'Courier New', monospace;
+        }
+        .bitacora-list { font-size: 12px; max-height: 300px; overflow-y: auto; }
 
-  .saldo-box {
-    margin-top: 10px;
-    background: #fff8e0;
-    border: 1px solid #c9a227;
-    border-radius: 4px;
-    padding: 8px 12px;
-    font-weight: bold;
-    font-size: 14px;
-    color: #4a3800;
-    text-align: center;
-  }
+        .card {
+            background: #f0c9e6; border: 3px solid #e8c144; border-radius: 4px;
+            padding: 16px 20px 20px 20px; position: relative;
+        }
+        .card.pagada::after {
+            content: "✅ PAGADO";
+            position: absolute; top: 20px; right: 20px;
+            background: #4caf50; color: white; padding: 8px 16px;
+            border-radius: 20px; font-weight: bold; font-size: 18px;
+            transform: rotate(15deg); opacity: 0.9;
+        }
 
-  .card-actions-wrapper {
-    margin-top: 12px;
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .card-actions-wrapper button {
-    padding: 8px 14px;
-    font-size: 12.5px;
-    font-weight: bold;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    color: white;
-    transition: opacity 0.2s, transform 0.1s;
-  }
-  .card-actions-wrapper button:hover { opacity: 0.85; }
-  .card-actions-wrapper button:active { transform: scale(0.96); }
-  .card-actions-wrapper button.guardar { background: #3d7d17; }
-  .card-actions-wrapper button.bitacora { background: #e68a2e; }
-  .card-actions-wrapper button.bitacora.active { background: #6c6c7a; }
-  .card-actions-wrapper button.exportar { background: #2a7de1; }
-  .card-actions-wrapper button.enviar { background: #34b7f1; }
-  .card-actions-wrapper button.borrar { background: #c0392b; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .card-title { font-family: var(--font-head); font-size: 24px; color: #2b2b2b; }
+        .ficha-num { font-size: 13px; font-weight: bold; color: #5f4479; background: #fff;
+            border-radius: 4px; padding: 3px 8px; display: inline-block; margin-bottom: 6px; }
+        .coin { width: 46px; height: 46px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #8bd050, #4c9a1f);
+            display: flex; align-items: center; justify-content: center;
+            color: #f5d000; font-weight: bold; font-size: 22px; border: 2px solid #3d7d17; }
 
-  #loginScreen {
-    position: fixed; inset: 0; z-index: 9999;
-    background: radial-gradient(circle at 50% 30%, #1c1c26 0%, #05050a 70%);
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-  }
-  #loginScreen.hidden { display: none; }
-  .login-panel {
-    position: relative; z-index: 2;
-    background: rgba(20,20,30,0.7);
-    border: 1px solid rgba(120,220,255,0.35);
-    border-radius: 18px;
-    padding: 32px 28px 24px 28px;
-    width: 320px;
-    text-align: center;
-    box-shadow: 0 0 40px rgba(90,200,255,0.25);
-    color: #fff;
-  }
-  .login-panel h2 {
-    font-family: Georgia, serif;
-    margin: 0 0 20px 0;
-    color: #cfefff;
-    font-size: 20px;
-  }
-  .login-panel label {
-    display: block;
-    text-align: left;
-    font-size: 12px;
-    margin-bottom: 4px;
-    color: #aaccee;
-  }
-  .login-panel input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 16px;
-    border: 1px solid #5588aa;
-    border-radius: 8px;
-    background: #1a1a2e;
-    color: #fff;
-    font-size: 14px;
-    box-sizing: border-box;
-  }
-  .login-panel button {
-    width: 100%;
-    padding: 12px;
-    background: #0066cc;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 8px;
-  }
-  .login-panel button:hover { background: #0055aa; }
-  .login-panel .error {
-    color: #ff8888;
-    font-size: 12px;
-    min-height: 16px;
-    margin-top: 8px;
-  }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; margin: 8px 0; }
+        .fld { font-size: 13px; font-weight: bold; color: #2b2b2b; }
+        .fld label { font-size: 11px; color: #5a4a4a; font-weight: normal; }
+        .fld input, .fld select { width: 100%; border: none; border-bottom: 1px dashed #4a4a4a;
+            background: transparent; font-size: 14px; font-weight: bold; color: #222; padding: 2px 0; }
 
-  .modal-overlay {
-    position: fixed; inset:0; background: rgba(0,0,0,0.55);
-    display:flex; align-items:center; justify-content:center; z-index: 500;
-    padding: 16px;
-  }
-  .modal-overlay.hidden { display:none; }
-  .modal-box {
-    background:#fff8f0; border:2px solid #7a5c99; border-radius:10px;
-    max-width: 420px; width:100%; max-height:85vh; overflow-y:auto;
-    padding: 18px 20px;
-  }
-  body.dark .modal-box { background:#242430; color:#e8e8ef; border-color:#7a5c99; }
-  body.dark .modal-box h2 { color:#c9a8ff; }
-  body.dark .modal-box .row { border-color:#444455; }
-  body.dark .modal-box input, body.dark .modal-box select { background:#1b1b24; color:#eee; border-color:#555; }
-  .modal-box h2 { margin-top:0; font-size:17px; color:#5f4479; font-family: var(--font-head); }
-  .modal-box h3.sub { font-size:13px; color:#5f4479; font-family: var(--font-head); margin:14px 0 4px 0; }
-  .estado-row { display:flex; justify-content:space-between; align-items:center; font-size:12.5px; padding:5px 4px; border-bottom:1px dotted #ccc; }
-  .estado-tag { font-size:11px; font-weight:bold; padding:2px 7px; border-radius:10px; color:#fff; }
-  .estado-tag.al-dia { background:#3d7d17; }
-  .estado-tag.atrasado { background:#b5482f; }
-  .estado-tag.espera { background:#8a6d1f; }
-  .estado-tag.pagado { background:#4a4a4a; }
-  .modal-box .row { display:flex; justify-content:space-between; font-size:14px; padding:5px 0; border-bottom:1px dotted #ccc; }
-  .modal-box button { margin-top:12px; padding:9px 14px; border:none; border-radius:6px; background:#7a5c99; color:#fff; font-weight:bold; cursor:pointer; }
-  .modal-box button.close { background:#4a4a4a; }
-  .modal-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-  .modal-box input[type="text"], .modal-box input[type="password"], .modal-box input[type="email"] {
-    width:100%; padding:8px; margin-top:6px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;
-  }
-  .search-result { padding:6px 4px; border-bottom:1px dotted #ccc; font-size:13px; cursor:pointer; }
-  .search-result:hover { background:rgba(122,92,153,0.1); }
-  .highlight-flash { animation: flashHi 1.4s ease-in-out; }
-  @keyframes flashHi {
-    0%,100% { box-shadow:none; }
-    30% { box-shadow: 0 0 0 5px rgba(255,208,0,0.85); }
-  }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; background: #f0c9e6; }
+        th, td { border: 1px solid #333; text-align: center; font-size: 12px; padding: 3px 1px; }
+        th { font-weight: bold; font-family: var(--font-head); }
+        td input { width: 100%; border: none; background: transparent; text-align: center;
+            font-size: 12px; padding: 3px 0; }
+        .restante-cell { font-weight: bold; background: rgba(255,248,224,0.6); }
 
-  .persona-historial-item {
-    display:flex; justify-content:space-between; align-items:center;
-    padding:8px 6px; border-bottom:1px dotted #ddd; font-size:13px;
-  }
-  .persona-historial-item .acciones { display:flex; gap:6px; }
-  .persona-historial-item .acciones button {
-    padding:4px 10px; font-size:11px; border:none; border-radius:4px;
-    cursor:pointer; background:#7a5c99; color:#fff;
-  }
-  .persona-historial-item .acciones button:hover { opacity:0.85; }
-  body.dark .persona-historial-item { border-color:#444; }
+        .ultimo-pago { font-size: 12px; color: #4a3800; text-align: right; margin-top: 4px; }
 
-  @media (max-width: 660px) {
-    .card-wrapper { width: 100%; }
-    .page-bitacora { padding: 14px 16px; min-height: 300px; }
-    .page-bitacora .bitacora-list { max-height: 200px; }
-  }
-</style>
+        .date-field { position: relative; }
+        .date-text { width: 100%; border: none; background: transparent; text-align: center;
+            font-size: 12px; padding: 3px 0; pointer-events: none; }
+        .date-native { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+        .saldo-box { margin-top: 10px; background: #fff8e0; border: 1px solid #c9a227;
+            border-radius: 4px; padding: 8px 12px; font-weight: bold;
+            font-size: 14px; color: #4a3800; text-align: center; }
+
+        .card-actions-wrapper { margin-top: 12px; display: flex; gap: 8px;
+            justify-content: center; flex-wrap: wrap; }
+        .card-actions-wrapper button { padding: 8px 14px; font-size: 12.5px;
+            font-weight: bold; border: none; border-radius: 6px; cursor: pointer;
+            color: white; transition: 0.2s; }
+        .guardar { background: #3d7d17; } .bitacora { background: #e68a2e; }
+        .exportar { background: #2a7de1; } .enviar { background: #34b7f1; }
+        .borrar { background: #c0392b; }
+
+        /* Selector de modos flotante */
+        .modo-flotante {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+        }
+        .modo-btn {
+            width: 48px; height: 48px; border-radius: 50%; border: none;
+            font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: 0.2s; background: var(--card-bg); color: var(--text);
+        }
+        .modo-btn.activo { background: var(--primary); color: white; }
+        .modo-opciones {
+            display: none; flex-direction: column; gap: 8px;
+        }
+        .modo-opciones.visible { display: flex; }
+
+        /* Estadísticas */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--card-bg); border-radius: 12px; padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: var(--primary); }
+        .stat-label { font-size: 12px; color: #888; }
+
+        /* Calculadora */
+        .calc-box { background: var(--card-bg); border-radius: 12px; padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .calc-result { background: #f0f0f0; border-radius: 8px; padding: 12px;
+            margin-top: 12px; font-weight: bold; }
+        body.dark .calc-result { background: #333; }
+        body.sol .calc-result { background: #f5f5f5; border: 1px solid black; }
+
+        /* Modal recibo */
+        .modal-recibo {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center; z-index: 999;
+        }
+        .modal-recibo.hidden { display: none; }
+        .recibo-content {
+            background: white; padding: 20px; border-radius: 12px;
+            max-width: 350px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+    </style>
 </head>
-<body>
+<body class="">
 
-<div id="loginScreen">
-  <div class="login-panel">
-    <h2>🔐 Mk Prestamos</h2>
-    <label for="loginEmail">Correo electrónico</label>
-    <input type="email" id="loginEmail" placeholder="tucorreo@gmail.com">
-    <label for="loginPassword">Contraseña</label>
-    <input type="password" id="loginPassword" placeholder="******">
-    <button id="btnLogin">Ingresar</button>
-    <div class="error" id="loginError"></div>
-    <p style="font-size:11px; color:#888; margin-top:14px;">Usuarios autorizados solamente</p>
-  </div>
-</div>
-
-<header class="app-header">
-  <h1>Control de Préstamos<span>Chinita Romero</span></h1>
-  <div id="clock">--:--:--</div>
-</header>
-
-<nav class="tabs">
-  <button class="tab-btn active" data-tab="fichas" onclick="cambiarPestana('fichas')">🗂️ Fichas</button>
-  <button class="tab-btn" data-tab="panel" onclick="cambiarPestana('panel')">📊 Panel general</button>
-  <button class="tab-btn" data-tab="respaldo" onclick="cambiarPestana('respaldo')">💾 Respaldo</button>
-  <button class="tab-btn" data-tab="config" onclick="cambiarPestana('config')">⚙️ Configuración</button>
-</nav>
-
-<div id="status"></div>
-
-<main>
-  <section id="tab-fichas" class="tab-pane active">
-    <div class="fichas-toolbar">
-      <button id="btnNuevaTarjeta" onclick="crearTarjeta()">+ Nueva tarjeta</button>
-      <select id="ordenSelect" onchange="reordenarTarjetas(this.value)">
-        <option value="ficha">Orden: N° de ficha</option>
-        <option value="nombre">Orden: Nombre A-Z</option>
-        <option value="saldo">Orden: Saldo mayor a menor</option>
-        <option value="atrasados">Orden: Atrasados primero</option>
-      </select>
-      <span style="font-size:12px; color:#888; margin-left:auto;">Total: <span id="totalTarjetas">0</span> tarjetas</span>
-    </div>
-    <div class="cards-container" id="cardsContainer"></div>
-  </section>
-
-  <section id="tab-panel" class="tab-pane">
-    <div class="modal-box" style="max-width:700px;">
-      <h2>📊 Panel general</h2>
-      <div class="row"><span>Total prestado</span><b id="pTotalPrestado">$0.00</b></div>
-      <div class="row"><span>Total pendiente</span><b id="pTotalPendiente">$0.00</b></div>
-      <div class="row"><span>Tarjetas activas</span><b id="pTotalActivas">0</b></div>
-      <div class="row"><span>Personas en historial</span><b id="pTotalPersonas">0</b></div>
-      <h3 class="sub">⏰ Próximos pagos y atrasados</h3>
-      <div id="pEstados"></div>
-      <h3 class="sub">🔎 Buscar por nombre</h3>
-      <input type="text" id="pBuscar" placeholder="Escribí un nombre..." oninput="buscarPorNombre(this.value)">
-      <div id="pResultados"></div>
-      <h3 class="sub">👤 Historial de personas</h3>
-      <div id="pHistorialPersonas"></div>
-      <h3 class="sub">🕓 Historial de copias</h3>
-      <div id="pHistorial"></div>
-    </div>
-  </section>
-
-  <section id="tab-respaldo" class="tab-pane">
-    <div class="modal-box" style="max-width:480px;">
-      <h2>💾 Copias de seguridad</h2>
-      <div class="row"><span>Última copia</span><b id="rUltima">-</b></div>
-      <div class="row"><span>Próxima copia</span><b id="rProxima">-</b></div>
-      <div class="row"><span>Veces abierta la app</span><b id="rVeces">-</b></div>
-      <div class="row"><span>Fecha última copia</span><b id="rFecha">-</b></div>
-      <div style="margin-top:12px; padding:8px; background:#f0f0f0; border-radius:6px; font-size:12px; color:#555;">
-        <strong>Datos sincronizados en la nube (Firebase)</strong>
-      </div>
-      <div class="modal-actions">
-        <button onclick="hacerCopia()">📀 Hacer copia</button>
-      </div>
-    </div>
-  </section>
-
-  <section id="tab-config" class="tab-pane">
-    <div class="modal-box" style="max-width:420px;">
-      <h2>⚙️ Configuración</h2>
-      <div class="row"><span>Versión</span><b>3.0 Firebase</b></div>
-      <div class="row"><span>Usuario</span><b id="cfgUserEmail">-</b></div>
-      <div class="row"><span>Tarjetas guardadas</span><b id="cfgTotalCards">0</b></div>
-      <div class="modal-actions">
-        <button id="btnOscuro" onclick="toggleModoOscuro()">🌙 Modo oscuro</button>
-        <button id="btnSonido" onclick="toggleSonido()">🔔 Sonido</button>
-        <button onclick="cerrarSesion()" style="background:#b5482f;">Cerrar sesión</button>
-      </div>
-      <div style="margin-top:12px; font-size:11px; color:#999; text-align:center;">
-        Datos sincronizados en Firebase Firestore.
-      </div>
-    </div>
-  </section>
-</main>
-
-<script>
-// ===================== CONFIGURACIÓN DE FIREBASE =====================
-const firebaseConfig = {
-  apiKey: "AIzaSyBu6l9vVMi80XWCjxqDvUH5UP_R4-KG8wA",
-  authDomain: "mk-prestamos.firebaseapp.com",
-  projectId: "mk-prestamos",
-  storageBucket: "mk-prestamos.firebasestorage.app",
-  messagingSenderId: "361378032824",
-  appId: "1:361378032824:web:d184d27460c2bf4549184d"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-db.enablePersistence().catch(() => {});
-
-// ===================== LOGIN =====================
-const loginScreen = document.getElementById('loginScreen');
-const loginEmail = document.getElementById('loginEmail');
-const loginPassword = document.getElementById('loginPassword');
-const btnLogin = document.getElementById('btnLogin');
-const loginError = document.getElementById('loginError');
-
-btnLogin.addEventListener('click', () => {
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value;
-  if (!email || !password) {
-    loginError.textContent = 'Completá todos los campos.';
-    return;
-  }
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => loginScreen.classList.add('hidden'))
-    .catch(err => { loginError.textContent = 'Error: ' + err.message; });
-});
-
-auth.onAuthStateChanged(user => {
-  if (user) {
-    loginScreen.classList.add('hidden');
-    document.getElementById('cfgUserEmail').textContent = user.email;
-    cargarTodo();
-  } else {
-    loginScreen.classList.remove('hidden');
-  }
-});
-
-function cerrarSesion() { auth.signOut(); location.reload(); }
-
-// ===================== RELOJ =====================
-function tick(){
-  const d = new Date();
-  document.getElementById('clock').textContent = formatoFechaHoraCompleta(d);
-}
-setInterval(tick, 1000); tick();
-
-function formatoFechaHoraCompleta(d){
-  const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const pad = n => String(n).padStart(2,'0');
-  let h = d.getHours(), ampm = h >= 12 ? 'PM' : 'AM';
-  h = h % 12; if (h === 0) h = 12;
-  return `${dias[d.getDay()]} ${d.getDate()} de ${meses[d.getMonth()]} · ${pad(h)}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${ampm}`;
-}
-
-function fechaCorta(d){ const pad = n => String(n).padStart(2,'0'); return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${String(d.getFullYear()).slice(-2)}`; }
-function timestampCompleto(d){ return formatoFechaHoraCompleta(d); }
-
-function normalizarFecha(str){
-  if (!str) return ''; str = String(str).trim(); if (str === '') return '';
-  let m = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (m) return `${m[3]}/${m[2]}/${m[1].slice(-2)}`;
-  m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (m) return `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}/${m[3].slice(-2)}`;
-  m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
-  if (m) return `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}/${m[3]}`;
-  return str;
-}
-function fechaDDMMYYaISO(str){
-  const m = String(str||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
-  if (!m) return ''; const yy = parseInt(m[3],10);
-  return `${yy <= 50 ? 2000+yy : 1900+yy}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
-}
-function isoAFechaDDMMYY(iso){
-  const m = String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  return m ? `${m[3]}/${m[2]}/${m[1].slice(-2)}` : '';
-}
-
-function campoFecha(attrsStr, value){
-  const disp = normalizarFecha(value), iso = fechaDDMMYYaISO(disp);
-  return `<div class="date-field"><input type="text" class="date-text" readonly value="${escAttr(disp)}"><input type="date" class="date-native" ${attrsStr} value="${iso}"></div>`;
-}
-document.addEventListener('change', (e)=>{
-  if (e.target && e.target.classList.contains('date-native')){
-    const txt = e.target.previousElementSibling;
-    if (txt && txt.classList.contains('date-text')) txt.value = isoAFechaDDMMYY(e.target.value);
-  }
-});
-
-// ===================== SONIDO =====================
-let sonidoActivo = true;
-function sonarConfirmacion(){
-  if (!sonidoActivo) return;
-  try {
-    if (navigator.vibrate) navigator.vibrate(35);
-    const ctx = window._audioCtx || (window._audioCtx = new (window.AudioContext||window.webkitAudioContext)());
-    const osc = ctx.createOscillator(), gain = ctx.createGain();
-    osc.type = 'sine'; osc.frequency.value = 880; gain.gain.value = 0.06;
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.start(); osc.stop(ctx.currentTime + 0.09);
-  } catch(e){}
-}
-function toggleSonido(){
-  sonidoActivo = !sonidoActivo;
-  localStorage.setItem('prestamos_sonido', sonidoActivo ? '1':'0');
-  const btn = document.getElementById('btnSonido');
-  btn.textContent = sonidoActivo ? '🔔 Sonido' : '🔇 Sonido';
-  btn.classList.toggle('toggle-on', sonidoActivo);
-}
-function aplicarPreferencias(){
-  sonidoActivo = localStorage.getItem('prestamos_sonido') !== '0';
-  document.getElementById('btnSonido').textContent = sonidoActivo ? '🔔 Sonido' : '🔇 Sonido';
-  if (localStorage.getItem('prestamos_modoOscuro') === '1') {
-    document.body.classList.add('dark');
-    document.getElementById('btnOscuro').classList.add('toggle-on');
-  }
-}
-function toggleModoOscuro(){
-  const activo = document.body.classList.toggle('dark');
-  localStorage.setItem('prestamos_modoOscuro', activo ? '1':'0');
-  document.getElementById('btnOscuro').classList.toggle('toggle-on', activo);
-}
-
-// ===================== ESTADO =====================
-let cards = {};
-let saveTimers = {};
-let siguienteNumeroCache = null;
-let creandoTarjeta = false;
-
-function nuevaFilaVacia(){ return { fecha:'', abono:'', siguiente:'' }; }
-function nuevaTarjetaData(numero){
-  return {
-    id: 'c_' + Date.now() + '_' + Math.floor(Math.random()*1000),
-    numero, senor: '', lugarTrabajo: '', capital: '', interes: 20,
-    cuotaMonto: '', cuotaFrecuencia: 'Quincenal', fechaInicio: '', fechaFin: '',
-    filas: Array.from({length:8}, nuevaFilaVacia), bitacora: []
-  };
-}
-function migrarTarjeta(data){
-  if (Array.isArray(data.filas) && data.filas.length && 'f1' in data.filas[0]){
-    const nuevas = [];
-    data.filas.forEach(f=>{
-      [['f1','a1'],['f2','a2'],['f3','a3']].forEach(([fk,ak])=>{
-        if ((f[fk] && f[fk].trim()!=='') || (f[ak] && String(f[ak]).trim()!=='')){
-          nuevas.push({ fecha: normalizarFecha(f[fk]||''), abono: f[ak]||'', siguiente:'' });
-        }
-      });
-    });
-    while (nuevas.length < 8) nuevas.push(nuevaFilaVacia());
-    for (let i=0;i<nuevas.length-1;i++){
-      if (nuevas[i].abono && nuevas[i+1] && nuevas[i+1].fecha) nuevas[i].siguiente = nuevas[i+1].fecha;
-    }
-    data.filas = nuevas;
-  }
-  data.fechaInicio = normalizarFecha(data.fechaInicio || '');
-  data.fechaFin = normalizarFecha(data.fechaFin || '');
-  return data;
-}
-
-// ===================== FIRESTORE =====================
-function guardarTarjetaFirestore(id){
-  if (!cards[id]) return;
-  clearTimeout(saveTimers[id]);
-  saveTimers[id] = setTimeout(() => {
-    db.collection('tarjetas').doc(id).set(cards[id])
-      .then(() => setStatus('Guardado ✓'))
-      .catch(() => setStatus('Error al guardar', true));
-  }, 700);
-}
-
-async function cargarTodo(){
-  document.getElementById('status').textContent = 'Cargando...';
-  try {
-    const snap = await db.collection('tarjetas').get();
-    cards = {};
-    document.getElementById('cardsContainer').innerHTML = '';
-    snap.forEach(doc => {
-      const data = migrarTarjeta(doc.data());
-      cards[doc.id] = data;
-      renderCard(data);
-    });
-    const metaSnap = await db.collection('meta').doc('config').get();
-    siguienteNumeroCache = metaSnap.exists ? (metaSnap.data().siguienteNumero || 1) : 1;
-  } catch(e) { setStatus('Error de conexión', true); }
-  document.getElementById('totalTarjetas').textContent = Object.keys(cards).length;
-  aplicarPreferencias();
-  setStatus('');
-}
-
-async function guardarSiguienteNumero(n){
-  await db.collection('meta').doc('config').set({ siguienteNumero: n }, { merge: true });
-}
-
-async function crearTarjeta(){
-  if (creandoTarjeta) return;
-  creandoTarjeta = true;
-  const btn = document.getElementById('btnNuevaTarjeta');
-  if (btn) btn.disabled = true;
-  try {
-    if (siguienteNumeroCache == null) siguienteNumeroCache = 1;
-    const n = siguienteNumeroCache; siguienteNumeroCache = n + 1;
-    const data = nuevaTarjetaData(n);
-    cards[data.id] = data;
-    await guardarSiguienteNumero(siguienteNumeroCache);
-    renderCard(data);
-    guardarTarjetaFirestore(data.id);
-    document.getElementById('totalTarjetas').textContent = Object.keys(cards).length;
-  } finally {
-    creandoTarjeta = false;
-    if (btn) btn.disabled = false;
-  }
-}
-
-function registrarCambio(data, campo, valor){
-  data.bitacora.push({ ts: timestampCompleto(new Date()), campo, valor });
-}
-
-function round2(n){ return Math.round((n + Number.EPSILON) * 100) / 100; }
-function formatoMoneda(n){ const v = isNaN(n) ? 0 : n; return '$' + v.toLocaleString('es-HN', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
-function calcularTotal(data){ const cap = round2(parseFloat(data.capital) || 0); const int = parseFloat(data.interes) || 0; return (Math.round(cap * 100) + Math.round(cap * 100 * int / 100)) / 100; }
-function calcularSaldo(data){ const totalCentavos = Math.round(calcularTotal(data) * 100); let abonos = 0; data.filas.forEach(f=>{ const v = parseFloat(f.abono); if (!isNaN(v)) abonos += Math.round(v * 100); }); return (totalCentavos - abonos) / 100; }
-
-function setStatus(msg, isError){
-  const el = document.getElementById('status');
-  el.textContent = msg; el.style.color = isError ? '#b5482f' : '#4a7c2f';
-  clearTimeout(setStatus._t);
-  setStatus._t = setTimeout(()=>{ el.textContent=''; }, 2500);
-}
-
-// ===================== RENDER =====================
-function renderCard(data){
-  const wrapper = document.createElement('div');
-  wrapper.className = 'card-wrapper'; wrapper.id = 'wrapper_' + data.id;
-  wrapper.innerHTML = `
-    <div class="pages-container">
-      <div class="page-bitacora" id="bitacora_${data.id}">
-        <h3>📖 Bitácora</h3>
-        <div class="back-sub">Ficha N° ${String(data.numero).padStart(3,'0')} — ${escHtml(data.senor) || 'Sin nombre'}</div>
-        <div class="bitacora-summary" id="bitacoraSummary_${data.id}">
-          <span class="k">Capital</span><span class="v">${formatoMoneda(parseFloat(data.capital)||0)}</span>
-          <span class="k">Total a pagar</span><span class="v">${formatoMoneda(calcularTotal(data))}</span>
-          <span class="k">Saldo</span><span class="v">${formatoMoneda(calcularSaldo(data))}</span>
-          <span class="k">Cambios</span><span class="v">${data.bitacora.length}</span>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-panel" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(20,20,30,0.7); border-radius: 18px; padding: 32px; width: 320px;
+            text-align: center; color: white; box-shadow: 0 0 40px rgba(90,200,255,0.25);">
+            <h2>🔐 Mk Prestamos</h2>
+            <label>Correo electrónico</label>
+            <input type="email" id="loginEmail" placeholder="tucorreo@gmail.com" style="width: 100%; padding: 10px; margin-bottom: 16px; border-radius: 8px; background: #1a1a2e; color: white; border: 1px solid #5588aa;">
+            <label>Contraseña</label>
+            <input type="password" id="loginPassword" placeholder="******" style="width: 100%; padding: 10px; margin-bottom: 16px; border-radius: 8px; background: #1a1a2e; color: white; border: 1px solid #5588aa;">
+            <button id="btnLogin" style="width: 100%; padding: 12px; background: #0066cc; color: white; border: none; border-radius: 8px; cursor: pointer;">Ingresar</button>
+            <p id="loginError" style="color: #ff8888; min-height: 16px; margin-top: 8px;"></p>
         </div>
-        <div class="bitacora-list" id="bitacoraList_${data.id}">${renderBitacoraItems(data)}</div>
-      </div>
-      <div class="page-boleta" id="boleta_${data.id}">${renderBoletaHtml(data)}</div>
     </div>
-    <div class="card-actions-wrapper">
-      <button class="guardar" onclick="guardarBoleta('${data.id}')">💾 Guardar</button>
-      <button class="bitacora" id="btnBitacora_${data.id}" onclick="toggleBitacora('${data.id}')">✍️ Bitácora</button>
-      <button class="exportar" onclick="exportarImagen('${data.id}')">📤 Exportar</button>
-      <button class="enviar" onclick="exportarMensaje('${data.id}')">📨 Enviar</button>
-      <button class="borrar" onclick="borrarTarjeta('${data.id}')">🗑️ Borrar</button>
-    </div>`;
-  document.getElementById('cardsContainer').appendChild(wrapper);
-  const container = wrapper.querySelector('.page-boleta');
-  configurarListenersBoleta(container, data);
-  actualizarTotalesYSaldo(container, data);
-}
 
-function renderBoletaHtml(data){
-  return `<div class="card">
-    <div class="ficha-num">N° Ficha: ${String(data.numero).padStart(3,'0')}</div>
-    <div class="card-header"><h1 class="card-title">Control de Préstamo Chinita Romero</h1><div class="coin">$</div></div>
-    <div class="grid2">
-      <div class="fld"><label>Señor(a)</label><input data-f="senor" value="${escAttr(data.senor)}"></div>
-      <div class="fld"><label>Lugar de trabajo</label><input data-f="lugarTrabajo" value="${escAttr(data.lugarTrabajo)}"></div>
-      <div class="fld"><label>Capital prestado</label><input data-f="capital" type="number" value="${escAttr(data.capital)}"></div>
-      <div class="fld"><label>Interés %</label><input data-f="interes" type="number" value="${escAttr(data.interes)}"></div>
-      <div class="fld readonly"><label>TOTAL a pagar</label><input data-total value="${formatoMoneda(calcularTotal(data))}" readonly></div>
-      <div class="fld"><label>Cuota</label><div style="display:flex;gap:6px;"><input data-f="cuotaMonto" type="number" value="${escAttr(data.cuotaMonto)}" style="flex:1;"><select data-f="cuotaFrecuencia" style="flex:1;"><option value="Semanal" ${data.cuotaFrecuencia==='Semanal'?'selected':''}>Semanal</option><option value="Quincenal" ${data.cuotaFrecuencia==='Quincenal'?'selected':''}>Quincenal</option><option value="Mensual" ${data.cuotaFrecuencia==='Mensual'?'selected':''}>Mensual</option></select></div></div>
-      <div class="fld"><label>Fecha de inicio</label>${campoFecha('data-f="fechaInicio"', data.fechaInicio)}</div>
-      <div class="fld"><label>Fecha en que termina</label>${campoFecha('data-f="fechaFin"', data.fechaFin)}</div>
+    <header class="app-header">
+        <h1>Control de Préstamos<span>Chinita Romero</span></h1>
+        <div id="clock">--:--:--</div>
+    </header>
+
+    <nav class="tabs">
+        <button class="tab-btn active" data-tab="fichas">🗂️ Fichas</button>
+        <button class="tab-btn" data-tab="panel">📊 Panel</button>
+        <button class="tab-btn" data-tab="stats">📈 Estadísticas</button>
+        <button class="tab-btn" data-tab="calculadora">🧮 Calculadora</button>
+        <button class="tab-btn" data-tab="config">⚙️ Config</button>
+    </nav>
+
+    <div id="status" style="text-align: center; font-size: 13px; min-height: 16px; margin-bottom: 8px;"></div>
+
+    <main>
+        <!-- Fichas -->
+        <section id="tab-fichas" class="tab-pane active">
+            <div class="fichas-toolbar">
+                <button onclick="crearTarjeta()" style="padding: 10px 14px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer;">+ Nueva tarjeta</button>
+                <select id="ordenSelect" onchange="reordenarTarjetas(this.value)">
+                    <option value="ficha">Orden: N° ficha</option>
+                    <option value="nombre">Nombre A-Z</option>
+                    <option value="saldo">Saldo mayor</option>
+                    <option value="atrasados">Atrasados primero</option>
+                </select>
+                <span style="font-size:12px;">Total: <span id="totalTarjetas">0</span> tarjetas</span>
+            </div>
+            <div class="cards-container" id="cardsContainer"></div>
+        </section>
+
+        <!-- Panel general -->
+        <section id="tab-panel" class="tab-pane">
+            <div class="modal-box" style="max-width:700px; margin: 0 auto; background: var(--card-bg); border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h2>📊 Panel general</h2>
+                <div class="row"><span>Total prestado</span><b id="pTotalPrestado">$0.00</b></div>
+                <div class="row"><span>Total pendiente</span><b id="pTotalPendiente">$0.00</b></div>
+                <div class="row"><span>Tarjetas activas</span><b id="pTotalActivas">0</b></div>
+                <h3>⏰ Próximos pagos</h3>
+                <div id="pEstados"></div>
+                <h3>🔎 Buscar por nombre</h3>
+                <input type="text" id="pBuscar" placeholder="Escribí un nombre..." oninput="buscarPorNombre(this.value)" style="width:100%; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid #ccc;">
+                <div id="pResultados"></div>
+            </div>
+        </section>
+
+        <!-- Estadísticas -->
+        <section id="tab-stats" class="tab-pane">
+            <div style="max-width:800px; margin:0 auto;">
+                <h2 style="font-family: var(--font-head); margin-bottom: 16px;">📈 Estadísticas</h2>
+                <div class="stats-grid" id="statsGrid"></div>
+                <h3 style="margin-top: 20px;">Ingresos mensuales (últimos 6 meses)</h3>
+                <canvas id="ingresosChart" width="400" height="200" style="width:100%; max-width:600px; background: var(--card-bg); border-radius: 8px; padding: 8px;"></canvas>
+            </div>
+        </section>
+
+        <!-- Calculadora -->
+        <section id="tab-calculadora" class="tab-pane">
+            <div class="calc-box" style="max-width:500px; margin:0 auto;">
+                <h2>🧮 Calculadora de préstamos</h2>
+                <div style="display:flex; flex-direction: column; gap: 10px;">
+                    <label>Monto del préstamo</label>
+                    <input type="number" id="calcMonto" placeholder="Ej: 1000" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+                    <label>Tasa de interés (%)</label>
+                    <input type="number" id="calcTasa" placeholder="Ej: 20" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+                    <label>Plazo (meses)</label>
+                    <input type="number" id="calcPlazo" placeholder="Ej: 6" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+                    <label>Frecuencia de pago</label>
+                    <select id="calcFrecuencia" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+                        <option value="Semanal">Semanal</option>
+                        <option value="Quincenal" selected>Quincenal</option>
+                        <option value="Mensual">Mensual</option>
+                    </select>
+                    <button onclick="calcularCuota()" style="padding:10px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer;">Calcular</button>
+                    <div id="calcResultado" class="calc-result" style="display: none;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuración -->
+        <section id="tab-config" class="tab-pane">
+            <div class="modal-box" style="max-width:420px; margin:0 auto; background: var(--card-bg); border-radius: 10px; padding: 20px;">
+                <h2>⚙️ Configuración</h2>
+                <div class="row"><span>Usuario</span><b id="cfgUserEmail">-</b></div>
+                <div class="row"><span>Tarjetas guardadas</span><b id="cfgTotalCards">0</b></div>
+                <button onclick="cerrarSesion()" style="background: #b5482f; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; margin-top: 12px;">Cerrar sesión</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Selector de modo flotante -->
+    <div class="modo-flotante">
+        <div class="modo-opciones" id="modoOpciones">
+            <button class="modo-btn" onclick="cambiarModo('sol')" title="Modo Sol">☀️</button>
+            <button class="modo-btn" onclick="cambiarModo('luna')" title="Modo Luna">🌙</button>
+            <button class="modo-btn" onclick="cambiarModo('normal')" title="Modo Normal">👩</button>
+        </div>
+        <button class="modo-btn" id="modoMainBtn" onclick="toggleModoOpciones()">☀️</button>
     </div>
-    <table><thead><tr><th>FECHA</th><th>ABONO</th><th>SIGUIENTE</th><th>RESTANTE</th></tr></thead><tbody>
-      ${(function(){
-        let saldoRun = Math.round(calcularTotal(data) * 100);
-        return data.filas.map((f,i)=>{
-          const tieneAbono = f.abono !== '' && f.abono != null && !isNaN(parseFloat(f.abono));
-          if (tieneAbono) saldoRun -= Math.round(parseFloat(f.abono) * 100);
-          return `<tr data-row="${i}"><td>${campoFecha('data-cell="fecha"', f.fecha)}</td><td><input data-cell="abono" type="number" step="0.01" value="${escAttr(f.abono)}"></td><td>${campoFecha('data-cell="siguiente"', f.siguiente)}</td><td class="restante-cell" data-restante>${tieneAbono ? formatoMoneda(saldoRun/100) : ''}</td></tr>`;
-        }).join('');
-      })()}
-    </tbody></table>
-    <div style="text-align:center;margin-top:6px;"><button onclick="agregarFila('${data.id}')" style="padding:5px 10px;font-size:11px;border:none;border-radius:5px;cursor:pointer;background:#5f4479;color:#fff;">➕ Agregar cuota</button></div>
-    <div class="saldo-box" data-saldo>Saldo pendiente: ${formatoMoneda(calcularSaldo(data))}</div>
-  </div>`;
-}
 
-function renderBitacoraItems(data){
-  const items = data.bitacora.slice().reverse();
-  const grupos = []; let grupoActual = null;
-  items.forEach(it=>{
-    const diaKey = it.ts.split('·')[0]?.trim() || '';
-    if (!grupoActual || grupoActual.dia !== diaKey){ grupoActual = { dia: diaKey, entradas: [] }; grupos.push(grupoActual); }
-    grupoActual.entradas.push(it);
-  });
-  if (grupos.length === 0) return '<div class="empty-log">Todavía no hay cambios registrados.</div>';
-  return grupos.map(g => `<div class="bitacora-day-label">📆 ${g.dia}</div>${g.entradas.map(it => {
-    const hora = it.ts.split('·').slice(1).join('·').trim();
-    return `<div class="bitacora-item"><span class="ico">${iconoParaCampo(String(it.campo))}</span><span class="txt"><span class="ts">${hora}</span><span class="campo">${escHtml(it.campo)}</span>: <b>${escHtml(String(it.valor))}</b></span></div>`;
-  }).join('')}`).join('');
-}
+    <!-- Modal Recibo -->
+    <div id="modalRecibo" class="modal-recibo hidden">
+        <div class="recibo-content" id="reciboContent"></div>
+    </div>
 
-function actualizarBitacora(id){
-  const data = cards[id]; if (!data) return;
-  const summary = document.getElementById('bitacoraSummary_' + id);
-  if (summary) summary.innerHTML = `<span class="k">Capital</span><span class="v">${formatoMoneda(parseFloat(data.capital)||0)}</span><span class="k">Total a pagar</span><span class="v">${formatoMoneda(calcularTotal(data))}</span><span class="k">Saldo</span><span class="v">${formatoMoneda(calcularSaldo(data))}</span><span class="k">Cambios</span><span class="v">${data.bitacora.length}</span>`;
-  const list = document.getElementById('bitacoraList_' + id);
-  if (list) list.innerHTML = renderBitacoraItems(data);
-}
+    <script>
+        // ===================== FIREBASE =====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBu6l9vVMi80XWCjxqDvUH5UP_R4-KG8wA",
+            authDomain: "mk-prestamos.firebaseapp.com",
+            projectId: "mk-prestamos",
+            storageBucket: "mk-prestamos.firebasestorage.app",
+            messagingSenderId: "361378032824",
+            appId: "1:361378032824:web:d184d27460c2bf4549184d"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        db.enablePersistence().catch(() => {});
 
-function configurarListenersBoleta(container, data){
-  container.querySelectorAll('[data-f]').forEach(inp=>{
-    inp.addEventListener('focus', ()=>{ inp.dataset.prev = inp.value; });
-    inp.addEventListener('change', ()=>{
-      const campo = inp.dataset.f, nuevo = inp.type === 'date' ? isoAFechaDDMMYY(inp.value) : inp.value;
-      if (inp.dataset.prev !== inp.value){
-        data[campo] = nuevo; registrarCambio(data, campo, nuevo);
-        actualizarTotalesYSaldo(container, data); actualizarBitacora(data.id); guardarTarjetaFirestore(data.id);
-      }
-    });
-  });
-  container.querySelectorAll('tbody input[data-cell]').forEach(inp=>{
-    const tr = inp.closest('tr'), rowIdx = parseInt(tr.dataset.row, 10), campo = inp.dataset.cell;
-    inp.addEventListener('focus', ()=>{ inp.dataset.prev = inp.value; });
-    inp.addEventListener('blur', ()=>{
-      const val = inp.type === 'date' ? isoAFechaDDMMYY(inp.value) : inp.value;
-      if (campo === 'abono' && val.trim() !== ''){
-        const inputFecha = tr.querySelector('input[data-cell="fecha"]');
-        if (inputFecha && inputFecha.value.trim() === ''){
-          const hoy = fechaCorta(new Date()); inputFecha.value = fechaDDMMYYaISO(hoy);
-          const txt = inputFecha.previousElementSibling; if (txt) txt.value = hoy;
-          data.filas[rowIdx].fecha = hoy; registrarCambio(data, `Fila ${rowIdx+1} - fecha`, hoy + ' (auto)'); actualizarBitacora(data.id);
+        // ===================== ESTADO =====================
+        let cards = {};
+        let modoActual = localStorage.getItem('prestamos_modo') || 'normal';
+        aplicarModo(modoActual);
+
+        // ===================== LOGIN =====================
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => document.getElementById('loginScreen').style.display = 'none')
+                .catch(err => document.getElementById('loginError').textContent = err.message);
+        });
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('cfgUserEmail').textContent = user.email;
+                cargarTodo();
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+            }
+        });
+
+        function cerrarSesion() { auth.signOut(); }
+
+        // ===================== RELOJ =====================
+        function tick() {
+            const d = new Date();
+            document.getElementById('clock').textContent = formatoFechaHora(d);
         }
-      }
-      if (inp.dataset.prev !== inp.value){
-        data.filas[rowIdx][campo] = val; registrarCambio(data, `Fila ${rowIdx+1} - ${campo}`, val);
-        actualizarTotalesYSaldo(container, data); actualizarBitacora(data.id); guardarTarjetaFirestore(data.id);
-      }
-    });
-  });
-}
+        setInterval(tick, 1000); tick();
 
-function toggleBitacora(id){
-  const wrapper = document.getElementById('wrapper_' + id), btn = document.getElementById('btnBitacora_' + id);
-  if (!wrapper || !btn) return;
-  wrapper.classList.toggle('mostrando-bitacora');
-  btn.textContent = wrapper.classList.contains('mostrando-bitacora') ? '📄 Boleta' : '✍️ Bitácora';
-  btn.classList.toggle('active', wrapper.classList.contains('mostrando-bitacora'));
-}
+        function formatoFechaHora(d) {
+            const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+            let h = d.getHours(), ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12; if (h === 0) h = 12;
+            return `${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]} · ${String(h).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')} ${ampm}`;
+        }
 
-function agregarFila(id){
-  const data = cards[id]; if (!data) return;
-  data.filas.push(nuevaFilaVacia());
-  const wrapper = document.getElementById('wrapper_' + id), container = wrapper.querySelector('.page-boleta');
-  container.innerHTML = renderBoletaHtml(data); configurarListenersBoleta(container, data);
-  actualizarTotalesYSaldo(container, data); actualizarBitacora(id); guardarTarjetaFirestore(id);
-}
+        function fechaCorta(d) {
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear()).slice(-2)}`;
+        }
 
-function actualizarTotalesYSaldo(container, data){
-  const totalInput = container.querySelector('[data-total]'); if (totalInput) totalInput.value = formatoMoneda(calcularTotal(data));
-  const saldoBox = container.querySelector('[data-saldo]'); if (saldoBox) saldoBox.textContent = 'Saldo pendiente: ' + formatoMoneda(calcularSaldo(data));
-  let saldoRun = Math.round(calcularTotal(data) * 100);
-  container.querySelectorAll('tbody tr').forEach((tr, i)=>{
-    const f = data.filas[i], celda = tr.querySelector('[data-restante]');
-    if (!celda) return;
-    const tieneAbono = f.abono !== '' && f.abono != null && !isNaN(parseFloat(f.abono));
-    if (tieneAbono){ saldoRun -= Math.round(parseFloat(f.abono) * 100); celda.textContent = formatoMoneda(saldoRun/100); }
-    else celda.textContent = '';
-  });
-}
+        // ===================== MODO (Sol/Luna/Normal) =====================
+        function cambiarModo(modo) {
+            localStorage.setItem('prestamos_modo', modo);
+            aplicarModo(modo);
+            document.getElementById('modoOpciones').classList.remove('visible');
+        }
 
-function iconoParaCampo(campo){
-  const c = campo.toLowerCase();
-  if (c.includes('abono')) return '💰'; if (c.includes('fecha') || c.includes('siguiente')) return '📅';
-  if (c.includes('capital') || c.includes('interes') || c.includes('cuota')) return '📋';
-  if (c.includes('senor') || c.includes('lugartrabajo')) return '👤';
-  return '✏️';
-}
+        function aplicarModo(modo) {
+            document.body.classList.remove('dark', 'sol');
+            if (modo === 'luna') document.body.classList.add('dark');
+            if (modo === 'sol') document.body.classList.add('sol');
+            document.getElementById('modoMainBtn').textContent = modo === 'sol' ? '☀️' : modo === 'luna' ? '🌙' : '👩';
+            modoActual = modo;
+        }
 
-async function guardarBoleta(id){ guardarTarjetaFirestore(id); setStatus('Boleta guardada ✓'); }
+        function toggleModoOpciones() {
+            document.getElementById('modoOpciones').classList.toggle('visible');
+        }
 
-async function borrarTarjeta(id){
-  if (!confirm('¿Seguro que querés borrar esta tarjeta?')) return;
-  await db.collection('tarjetas').doc(id).delete();
-  delete cards[id]; const wrapper = document.getElementById('wrapper_' + id);
-  if (wrapper) wrapper.remove();
-  document.getElementById('totalTarjetas').textContent = Object.keys(cards).length;
-  setStatus('Tarjeta borrada');
-}
+        // ===================== FIRESTORE =====================
+        async function cargarTodo() {
+            try {
+                const snap = await db.collection('tarjetas').get();
+                cards = {};
+                document.getElementById('cardsContainer').innerHTML = '';
+                snap.forEach(doc => {
+                    const data = migrarTarjeta(doc.data());
+                    cards[doc.id] = data;
+                    renderCard(data);
+                });
+                const metaSnap = await db.collection('meta').doc('config').get();
+                siguienteNumeroCache = metaSnap.exists ? (metaSnap.data().siguienteNumero || 1) : 1;
+            } catch (e) { console.error(e); }
+            document.getElementById('totalTarjetas').textContent = Object.keys(cards).length;
+            actualizarPanel();
+        }
 
-// ===================== EXPORTAR =====================
-async function exportarImagen(id){
-  const wrapper = document.getElementById('wrapper_' + id), boleta = wrapper.querySelector('.page-boleta .card');
-  setStatus('Generando imagen...');
-  try {
-    const canvas = await html2canvas(boleta, { backgroundColor: '#f0c9e6', scale: 2 });
-    canvas.toBlob(async (blob) => {
-      const data = cards[id], nombreArchivo = `ficha_${String(data.numero).padStart(3,'0')}_${(data.senor||'sin_nombre').replace(/\s+/g,'_')}.png`;
-      const file = new File([blob], nombreArchivo, { type: 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file] }); } catch(e){} }
-      else { const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = nombreArchivo; a.click(); URL.revokeObjectURL(url); }
-      setStatus('Imagen lista ✓');
-    }, 'image/png');
-  } catch(e){ setStatus('Error al generar imagen', true); }
-}
+        let siguienteNumeroCache = 1;
+        function guardarTarjeta(id) {
+            clearTimeout(window._saveTimers?.[id]);
+            if (!window._saveTimers) window._saveTimers = {};
+            window._saveTimers[id] = setTimeout(() => {
+                db.collection('tarjetas').doc(id).set(cards[id]).catch(console.error);
+            }, 500);
+        }
 
-function resumenTexto(data){
-  return `*Mk Prestamos - Chinita Romero*\nFicha N°: ${String(data.numero).padStart(3,'0')}\nSeñor(a): ${data.senor || '-'}\nCapital: ${formatoMoneda(parseFloat(data.capital)||0)}\nTotal a pagar: ${formatoMoneda(calcularTotal(data))}\nCuota: ${formatoMoneda(parseFloat(data.cuotaMonto)||0)} (${data.cuotaFrecuencia})\nSaldo pendiente: ${formatoMoneda(calcularSaldo(data))}`;
-}
+        async function crearTarjeta() {
+            const n = siguienteNumeroCache++;
+            const data = {
+                id: 'c_' + Date.now(),
+                numero: n,
+                senor: '', lugarTrabajo: '', capital: '', interes: 20,
+                cuotaMonto: '', cuotaFrecuencia: 'Quincenal',
+                fechaInicio: '', fechaFin: '',
+                filas: Array.from({ length: 8 }, () => ({ fecha: '', abono: '', siguiente: '' })),
+                bitacora: []
+            };
+            cards[data.id] = data;
+            await db.collection('meta').doc('config').set({ siguienteNumero: siguienteNumeroCache }, { merge: true });
+            renderCard(data);
+            guardarTarjeta(data.id);
+            document.getElementById('totalTarjetas').textContent = Object.keys(cards).length;
+        }
 
-async function exportarMensaje(id){
-  const data = cards[id], texto = resumenTexto(data);
-  if (navigator.share){ try { await navigator.share({ text: texto }); } catch(e){} }
-  else window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
-}
+        function migrarTarjeta(data) {
+            if (data.filas?.length && 'f1' in data.filas[0]) {
+                data.filas = data.filas.map(f => ({
+                    fecha: f.f1 || '', abono: f.a1 || '', siguiente: f.f2 || ''
+                }));
+            }
+            return data;
+        }
 
-// ===================== ORDEN =====================
-function reordenarTarjetas(criterio){
-  const cont = document.getElementById('cardsContainer'), lista = Object.values(cards);
-  lista.sort((a,b)=>{
-    if (criterio === 'nombre') return (a.senor||'').localeCompare(b.senor||'', 'es', {sensitivity:'base'});
-    if (criterio === 'saldo') return calcularSaldo(b) - calcularSaldo(a);
-    if (criterio === 'atrasados') return prioridadEstado(a) - prioridadEstado(b);
-    return a.numero - b.numero;
-  });
-  lista.forEach(d=>{ const wrapper = document.getElementById('wrapper_' + d.id); if (wrapper) cont.appendChild(wrapper); });
-}
+        // ===================== RENDER =====================
+        function renderCard(data) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'card-wrapper';
+            wrapper.id = 'wrapper_' + data.id;
+            const saldo = calcularSaldo(data);
+            const atrasada = estadoTarjeta(data).clase === 'atrasado';
+            if (atrasada) wrapper.classList.add('atrasada');
+            if (saldo <= 0 && data.capital) wrapper.classList.add('pagada');
 
-function estadoTarjeta(data){
-  const saldo = calcularSaldo(data);
-  if (saldo <= 0 && data.capital) return { texto:'Pagado', clase:'pagado', dias:null };
-  const primera = primeraFechaCobro(data), hoy = new Date();
-  if (primera && hoy < primera) return { texto:`Aún no inicia (${Math.round((primera-hoy)/86400000)}d)`, clase:'espera', dias:null };
-  let proxima = null;
-  data.filas.forEach(f=>{ if (f.siguiente){ const iso = fechaDDMMYYaISO(normalizarFecha(f.siguiente)); if (iso) proxima = new Date(iso + 'T00:00:00'); } });
-  if (!proxima) proxima = primera;
-  if (!proxima) return { texto:'Sin fecha', clase:'espera', dias:null };
-  const dias = Math.round((new Date() - proxima) / 86400000);
-  return dias > 0 ? { texto:`Atrasado ${Math.abs(dias)}d`, clase:'atrasado', dias } : { texto:`Al día (${Math.abs(dias)}d)`, clase:'al-dia', dias };
-}
+            const ultimoPago = obtenerUltimoPago(data);
 
-function primeraFechaCobro(data){
-  const iniISO = fechaDDMMYYaISO(normalizarFecha(data.fechaInicio));
-  if (!iniISO) return null;
-  const d = new Date(iniISO + 'T00:00:00');
-  d.setDate(d.getDate() + (data.cuotaFrecuencia === 'Semanal' ? 7 : data.cuotaFrecuencia === 'Mensual' ? 30 : 15));
-  return d;
-}
+            wrapper.innerHTML = `
+                <div class="pages-container">
+                    <div class="page-boleta">
+                        <div class="card ${saldo <= 0 && data.capital ? 'pagada' : ''}">
+                            <div class="ficha-num">N° ${String(data.numero).padStart(3, '0')}</div>
+                            <div class="card-header">
+                                <h1 class="card-title">Préstamo Chinita Romero</h1>
+                                <div class="coin">$</div>
+                            </div>
+                            <div class="grid2">
+                                <div class="fld"><label>Señor(a)</label><input data-f="senor" value="${escAttr(data.senor)}"></div>
+                                <div class="fld"><label>Lugar de trabajo</label><input data-f="lugarTrabajo" value="${escAttr(data.lugarTrabajo)}"></div>
+                                <div class="fld"><label>Capital</label><input data-f="capital" type="number" value="${escAttr(data.capital)}"></div>
+                                <div class="fld"><label>Interés %</label><input data-f="interes" type="number" value="${escAttr(data.interes)}"></div>
+                                <div class="fld readonly"><label>TOTAL</label><input data-total value="${formatoMoneda(calcularTotal(data))}" readonly></div>
+                                <div class="fld"><label>Cuota</label>
+                                    <div style="display:flex; gap:6px;">
+                                        <input data-f="cuotaMonto" type="number" value="${escAttr(data.cuotaMonto)}" style="flex:1;">
+                                        <select data-f="cuotaFrecuencia" style="flex:1;">
+                                            <option value="Semanal" ${data.cuotaFrecuencia === 'Semanal' ? 'selected' : ''}>Semanal</option>
+                                            <option value="Quincenal" ${data.cuotaFrecuencia === 'Quincenal' ? 'selected' : ''}>Quincenal</option>
+                                            <option value="Mensual" ${data.cuotaFrecuencia === 'Mensual' ? 'selected' : ''}>Mensual</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="fld"><label>Fecha inicio</label>${campoFecha('data-f="fechaInicio"', data.fechaInicio)}</div>
+                                <div class="fld"><label>Fecha fin</label>${campoFecha('data-f="fechaFin"', data.fechaFin)}</div>
+                            </div>
+                            <table><thead><tr><th>FECHA</th><th>ABONO</th><th>SIGUIENTE</th><th>RESTANTE</th><th></th></tr></thead><tbody>
+                                ${data.filas.map((f, i) => {
+                                    let saldoRun = calcularTotal(data) * 100;
+                                    for (let j = 0; j <= i; j++) {
+                                        if (data.filas[j].abono) saldoRun -= Math.round(parseFloat(data.filas[j].abono) * 100);
+                                    }
+                                    const restante = f.abono ? formatoMoneda(saldoRun / 100) : '';
+                                    return `<tr>
+                                        <td>${campoFecha('data-cell="fecha"', f.fecha)}</td>
+                                        <td><input data-cell="abono" type="number" step="0.01" value="${escAttr(f.abono)}"></td>
+                                        <td>${campoFecha('data-cell="siguiente"', f.siguiente)}</td>
+                                        <td class="restante-cell">${restante}</td>
+                                        <td><button onclick="verRecibo('${data.id}', ${i})" style="font-size:10px; padding:2px 5px;">🧾</button></td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody></table>
+                            <div style="text-align:center; margin-top:6px;">
+                                <button onclick="agregarFila('${data.id}')" style="padding:5px 10px; background:#5f4479; color:#fff; border:none; border-radius:5px;">+ Agregar cuota</button>
+                            </div>
+                            <div class="saldo-box">Saldo pendiente: ${formatoMoneda(saldo)}</div>
+                            ${ultimoPago ? `<div class="ultimo-pago">Último pago: ${ultimoPago}</div>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-actions-wrapper">
+                    <button class="guardar" onclick="guardarBoleta('${data.id}')">💾 Guardar</button>
+                    <button class="exportar" onclick="exportarImagen('${data.id}')">📤 Exportar</button>
+                    <button class="enviar" onclick="exportarMensaje('${data.id}')">📨 Enviar</button>
+                    <button class="borrar" onclick="borrarTarjeta('${data.id}')">🗑️ Borrar</button>
+                </div>`;
+            document.getElementById('cardsContainer').appendChild(wrapper);
+            configurarListeners(wrapper, data);
+            actualizarTotales(wrapper, data);
+        }
 
-function prioridadEstado(data){ const e = estadoTarjeta(data); if (e.clase==='atrasado') return 0; if (e.clase==='al-dia') return 1; if (e.clase==='espera') return 2; return 3; }
+        function configurarListeners(wrapper, data) {
+            wrapper.querySelectorAll('[data-f]').forEach(inp => {
+                inp.addEventListener('change', () => {
+                    data[inp.dataset.f] = inp.value;
+                    guardarTarjeta(data.id);
+                    actualizarTotales(wrapper, data);
+                    actualizarEstadoVisual(data);
+                });
+            });
+            wrapper.querySelectorAll('[data-cell]').forEach(inp => {
+                inp.addEventListener('blur', () => {
+                    const row = inp.closest('tr').rowIndex;
+                    const cell = inp.dataset.cell;
+                    data.filas[row][cell] = inp.value;
+                    if (cell === 'abono' && inp.value) {
+                        const fechaInput = inp.closest('tr').querySelector('.date-native');
+                        if (!fechaInput.value) {
+                            const hoy = fechaCorta(new Date());
+                            fechaInput.value = hoy;
+                            data.filas[row].fecha = hoy;
+                        }
+                    }
+                    guardarTarjeta(data.id);
+                    actualizarTotales(wrapper, data);
+                    actualizarEstadoVisual(data);
+                });
+            });
+        }
 
-// ===================== PESTAÑAS =====================
-function cambiarPestana(nombre){
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === nombre));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + nombre));
-  if (nombre === 'panel') abrirPanelExtra();
-  if (nombre === 'respaldo') abrirRespaldo();
-  if (nombre === 'config') document.getElementById('cfgTotalCards').textContent = Object.keys(cards).length;
-}
+        function actualizarTotales(wrapper, data) {
+            const totalInput = wrapper.querySelector('[data-total]');
+            if (totalInput) totalInput.value = formatoMoneda(calcularTotal(data));
+            const saldoBox = wrapper.querySelector('.saldo-box');
+            if (saldoBox) saldoBox.textContent = 'Saldo pendiente: ' + formatoMoneda(calcularSaldo(data));
+            // Actualizar restantes
+            let saldoRun = calcularTotal(data) * 100;
+            const filas = wrapper.querySelectorAll('tbody tr');
+            filas.forEach((tr, i) => {
+                if (data.filas[i]?.abono) saldoRun -= Math.round(parseFloat(data.filas[i].abono) * 100);
+                const celda = tr.querySelector('.restante-cell');
+                if (celda) celda.textContent = data.filas[i]?.abono ? formatoMoneda(saldoRun / 100) : '';
+            });
+            wrapper.querySelector('.ultimo-pago').textContent = obtenerUltimoPago(data) ? 'Último pago: ' + obtenerUltimoPago(data) : '';
+        }
 
-function abrirPanelExtra(){
-  let tp = 0, tpe = 0, act = 0;
-  Object.values(cards).forEach(d=>{ tp += Math.round((parseFloat(d.capital)||0)*100); tpe += Math.round(calcularSaldo(d)*100); if (calcularSaldo(d) > 0) act++; });
-  document.getElementById('pTotalPrestado').textContent = formatoMoneda(tp/100);
-  document.getElementById('pTotalPendiente').textContent = formatoMoneda(tpe/100);
-  document.getElementById('pTotalActivas').textContent = act;
-  document.getElementById('pBuscar').value = ''; document.getElementById('pResultados').innerHTML = '';
-  renderEstadosPanel(); renderHistorialPersonas();
-}
+        function actualizarEstadoVisual(data) {
+            const wrapper = document.getElementById('wrapper_' + data.id);
+            if (!wrapper) return;
+            const saldo = calcularSaldo(data);
+            wrapper.classList.toggle('pagada', saldo <= 0 && data.capital);
+            const atrasada = estadoTarjeta(data).clase === 'atrasado';
+            wrapper.classList.toggle('atrasada', atrasada);
+        }
 
-function renderEstadosPanel(){
-  const cont = document.getElementById('pEstados'), lista = Object.values(cards).sort((a,b)=>prioridadEstado(a)-prioridadEstado(b));
-  cont.innerHTML = lista.length === 0 ? '<div class="empty-log">No hay tarjetas.</div>' : lista.map(d=>{
-    const e = estadoTarjeta(d);
-    return `<div class="estado-row"><span>Ficha ${String(d.numero).padStart(3,'0')} — ${escHtml(d.senor||'Sin nombre')}</span><span class="estado-tag ${e.clase}">${e.texto}</span></div>`;
-  }).join('');
-}
+        function obtenerUltimoPago(data) {
+            let ultimo = null;
+            data.filas.forEach(f => {
+                if (f.abono && f.fecha) {
+                    const fechaISO = fechaDDMMYYaISO(f.fecha);
+                    if (fechaISO && (!ultimo || fechaISO > ultimo)) ultimo = fechaISO;
+                }
+            });
+            return ultimo ? isoAFechaDDMMYY(ultimo) : null;
+        }
 
-function renderHistorialPersonas(){
-  const cont = document.getElementById('pHistorialPersonas'), personas = {};
-  Object.values(cards).forEach(d=>{ const n = d.senor?.trim() || 'Sin nombre'; if (!personas[n]) personas[n] = []; personas[n].push(d); });
-  const nombres = Object.keys(personas).sort();
-  document.getElementById('pTotalPersonas').textContent = nombres.length;
-  cont.innerHTML = nombres.length === 0 ? '<div class="empty-log">No hay personas.</div>' : nombres.map(n=>{
-    const p = personas[n], tp = p.reduce((s,d)=>s+(parseFloat(d.capital)||0),0), tpe = p.reduce((s,d)=>s+calcularSaldo(d),0), act = p.filter(d=>calcularSaldo(d)>0).length;
-    return `<div class="persona-historial-item"><div><strong>${escHtml(n)}</strong><span style="font-size:11px;color:#888;margin-left:8px;">${p.length} prést. · ${formatoMoneda(tp)} · Pend: ${formatoMoneda(tpe)} · Act: ${act}</span></div><div class="acciones"><button onclick="crearPrestamoParaPersona('${escAttr(n)}')">+ Nuevo</button><button onclick="verPrestamosPersona('${escAttr(n)}')">Ver</button></div></div>`;
-  }).join('');
-}
+        function verRecibo(id, rowIndex) {
+            const data = cards[id];
+            const fila = data.filas[rowIndex];
+            if (!fila.abono) return alert('Esa fila no tiene abono registrado.');
+            const contenido = `
+                <h3>🧾 Recibo de pago</h3>
+                <p><strong>Cliente:</strong> ${data.senor || 'Sin nombre'}</p>
+                <p><strong>Ficha:</strong> ${String(data.numero).padStart(3, '0')}</p>
+                <p><strong>Fecha:</strong> ${fila.fecha}</p>
+                <p><strong>Abono:</strong> ${formatoMoneda(parseFloat(fila.abono))}</p>
+                <p><strong>Saldo pendiente:</strong> ${formatoMoneda(calcularSaldo(data))}</p>
+                <button onclick="document.getElementById('modalRecibo').classList.add('hidden')" style="margin-top:10px; padding:6px 12px;">Cerrar</button>
+            `;
+            document.getElementById('reciboContent').innerHTML = contenido;
+            document.getElementById('modalRecibo').classList.remove('hidden');
+        }
 
-function crearPrestamoParaPersona(nombre){
-  cambiarPestana('fichas');
-  setTimeout(()=>{ crearTarjeta().then(()=>{
-    const ids = Object.keys(cards); if (ids.length > 0){ const d = cards[ids[ids.length-1]]; if (d){ d.senor = nombre; registrarCambio(d, 'senor', nombre);
-    const w = document.getElementById('wrapper_' + d.id); if (w){ const c = w.querySelector('.page-boleta'); c.innerHTML = renderBoletaHtml(d); configurarListenersBoleta(c, d); actualizarTotalesYSaldo(c, d); actualizarBitacora(d.id); guardarTarjetaFirestore(d.id); } } }
-  }); }, 100);
-}
+        // ===================== UTILIDADES =====================
+        function formatoMoneda(n) { return '$' + (isNaN(n) ? 0 : n).toLocaleString('es-HN', { minimumFractionDigits: 2 }); }
+        function calcularTotal(data) { const cap = parseFloat(data.capital) || 0; const int = parseFloat(data.interes) || 0; return cap + (cap * int / 100); }
+        function calcularSaldo(data) { let abonos = 0; data.filas.forEach(f => { if (f.abono) abonos += parseFloat(f.abono); }); return calcularTotal(data) - abonos; }
 
-function verPrestamosPersona(nombre){
-  cambiarPestana('fichas');
-  setTimeout(()=>{ const ids = Object.keys(cards).filter(id=>cards[id].senor===nombre);
-    ids.forEach(id=>{ const w = document.getElementById('wrapper_' + id); if (w){ w.scrollIntoView({behavior:'smooth',block:'center'}); const card = w.querySelector('.page-boleta .card'); if (card){ card.classList.add('highlight-flash'); setTimeout(()=>card.classList.remove('highlight-flash'),1500); } } });
-  }, 100);
-}
+        function estadoTarjeta(data) {
+            const saldo = calcularSaldo(data);
+            if (saldo <= 0 && data.capital) return { texto: 'Pagado', clase: 'pagado' };
+            // lógica simplificada
+            return { texto: 'Activo', clase: 'al-dia' };
+        }
 
-function buscarPorNombre(texto){
-  const cont = document.getElementById('pResultados'), q = texto.trim().toLowerCase();
-  if (q === ''){ cont.innerHTML = ''; return; }
-  const resultados = Object.values(cards).filter(d=>(d.senor||'').toLowerCase().includes(q));
-  cont.innerHTML = resultados.length === 0 ? '<div class="empty-log">Sin resultados.</div>' : resultados.map(d=>`<div class="search-result" onclick="irATarjeta('${d.id}')">Ficha ${String(d.numero).padStart(3,'0')} — ${escHtml(d.senor||'Sin nombre')} — ${formatoMoneda(calcularSaldo(d))}</div>`).join('');
-}
+        function campoFecha(attrs, value) {
+            return `<div class="date-field"><input type="text" class="date-text" readonly value="${escAttr(value)}"><input type="date" class="date-native" ${attrs} value="${value ? fechaDDMMYYaISO(value) : ''}"></div>`;
+        }
 
-function irATarjeta(id){ cambiarPestana('fichas'); setTimeout(()=>{ const w = document.getElementById('wrapper_' + id); if (w){ w.scrollIntoView({behavior:'smooth',block:'center'}); const c = w.querySelector('.page-boleta .card'); if (c){ c.classList.add('highlight-flash'); setTimeout(()=>c.classList.remove('highlight-flash'),1500); } } }, 60); }
+        function fechaDDMMYYaISO(str) {
+            const m = String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+            if (!m) return '';
+            const yy = parseInt(m[3]); const yyyy = yy <= 50 ? 2000 + yy : 1900 + yy;
+            return `${yyyy}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+        }
+        function isoAFechaDDMMYY(iso) {
+            const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            return m ? `${m[3]}/${m[2]}/${m[1].slice(-2)}` : '';
+        }
 
-function abrirRespaldo(){
-  document.getElementById('rUltima').textContent = 'Firestore (nube)';
-  document.getElementById('rProxima').textContent = 'Automático';
-  document.getElementById('rVeces').textContent = '-';
-  document.getElementById('rFecha').textContent = 'Tiempo real';
-}
+        // ===================== PANEL / ESTADÍSTICAS =====================
+        function actualizarPanel() {
+            let totalPrestado = 0, totalPendiente = 0;
+            Object.values(cards).forEach(d => {
+                totalPrestado += parseFloat(d.capital) || 0;
+                totalPendiente += calcularSaldo(d);
+            });
+            document.getElementById('pTotalPrestado').textContent = formatoMoneda(totalPrestado);
+            document.getElementById('pTotalPendiente').textContent = formatoMoneda(totalPendiente);
+            document.getElementById('pTotalActivas').textContent = Object.keys(cards).length;
 
-async function hacerCopia(){ setStatus('Datos sincronizados en Firebase. No requiere copia manual.', false); }
+            // Estadísticas
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card"><div class="stat-value">${formatoMoneda(totalPrestado)}</div><div class="stat-label">Total prestado</div></div>
+                <div class="stat-card"><div class="stat-value">${formatoMoneda(totalPendiente)}</div><div class="stat-label">Pendiente</div></div>
+                <div class="stat-card"><div class="stat-value">${formatoMoneda(totalPrestado - totalPendiente)}</div><div class="stat-label">Recaudado</div></div>
+                <div class="stat-card"><div class="stat-value">${Object.keys(cards).length}</div><div class="stat-label">Clientes activos</div></div>
+            `;
+            dibujarGrafico();
+        }
 
-function escAttr(v){ return String(v==null?'':v).replace(/"/g,'&quot;'); }
-function escHtml(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-</script>
+        function dibujarGrafico() {
+            const canvas = document.getElementById('ingresosChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const ingresosMensuales = new Array(6).fill(0);
+            // Calcular ingresos por mes (simplificado)
+            Object.values(cards).forEach(d => {
+                d.filas.forEach(f => {
+                    if (f.abono && f.fecha) {
+                        const iso = fechaDDMMYYaISO(f.fecha);
+                        if (iso) {
+                            const fecha = new Date(iso);
+                            const mesIndex = 5 - (new Date().getMonth() - fecha.getMonth() + 12) % 12;
+                            if (mesIndex >= 0 && mesIndex < 6) ingresosMensuales[mesIndex] += parseFloat(f.abono);
+                        }
+                    }
+                });
+            });
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const max = Math.max(...ingresosMensuales, 1);
+            const anchoBarra = 40;
+            ingresosMensuales.forEach((val, i) => {
+                const altura = (val / max) * 150;
+                ctx.fillStyle = '#5f4479';
+                ctx.fillRect(i * 70 + 20, 180 - altura, anchoBarra, altura);
+                ctx.fillStyle = '#000';
+                ctx.fillText(formatoMoneda(val), i * 70 + 20, 180 - altura - 5);
+            });
+        }
+
+        // ===================== CALCULADORA =====================
+        function calcularCuota() {
+            const monto = parseFloat(document.getElementById('calcMonto').value);
+            const tasa = parseFloat(document.getElementById('calcTasa').value);
+            const plazo = parseInt(document.getElementById('calcPlazo').value);
+            const frecuencia = document.getElementById('calcFrecuencia').value;
+            if (isNaN(monto) || isNaN(tasa) || isNaN(plazo)) return alert('Completá todos los campos.');
+            const totalInteres = monto * (tasa / 100);
+            const totalPagar = monto + totalInteres;
+            let numPagos;
+            switch (frecuencia) {
+                case 'Semanal': numPagos = plazo * 4; break;
+                case 'Quincenal': numPagos = plazo * 2; break;
+                default: numPagos = plazo;
+            }
+            const cuota = totalPagar / numPagos;
+            document.getElementById('calcResultado').style.display = 'block';
+            document.getElementById('calcResultado').innerHTML = `
+                <p>Total a pagar: <strong>${formatoMoneda(totalPagar)}</strong></p>
+                <p>Número de pagos: <strong>${numPagos}</strong> (${frecuencia})</p>
+                <p>Cuota: <strong>${formatoMoneda(cuota)}</strong></p>
+            `;
+        }
+
+        function escAttr(s) { return String(s || '').replace(/"/g, '&quot;'); }
+    </script>
 </body>
 </html>
