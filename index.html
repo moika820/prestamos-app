@@ -10,12 +10,11 @@
 <meta name="theme-color" content="#2b2b2b">
 <title>Mk Prestamos</title>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
   * { box-sizing: border-box; }
   :root {
@@ -484,6 +483,21 @@
 </head>
 <body>
 
+<datalist id="listaNombres">
+  <option value="Giovanni">
+  <option value="Joel">
+  <option value="Henry">
+  <option value="Israel">
+  <option value="Oscar">
+  <option value="Hugo">
+</datalist>
+<datalist id="listaLugares">
+  <option value="IMFICA">
+  <option value="Call center">
+  <option value="ISSS">
+  <option value="Informal">
+</datalist>
+
 <div id="loginScreen">
   <div class="login-panel">
     <h2>🔐 Mk Prestamos</h2>
@@ -580,7 +594,6 @@
 </main>
 
 <script>
-// ===================== CONFIGURACIÓN DE FIREBASE =====================
 const firebaseConfig = {
   apiKey: "AIzaSyBu6l9vVMi80XWCjxqDvUH5UP_R4-KG8wA",
   authDomain: "mk-prestamos.firebaseapp.com",
@@ -589,13 +602,11 @@ const firebaseConfig = {
   messagingSenderId: "361378032824",
   appId: "1:361378032824:web:d184d27460c2bf4549184d"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 db.enablePersistence().catch(() => {});
 
-// ===================== LOGIN =====================
 const loginScreen = document.getElementById('loginScreen');
 const loginEmail = document.getElementById('loginEmail');
 const loginPassword = document.getElementById('loginPassword');
@@ -626,7 +637,6 @@ auth.onAuthStateChanged(user => {
 
 function cerrarSesion() { auth.signOut(); location.reload(); }
 
-// ===================== RELOJ =====================
 function tick(){
   const d = new Date();
   document.getElementById('clock').textContent = formatoFechaHoraCompleta(d);
@@ -669,14 +679,56 @@ function campoFecha(attrsStr, value){
   const disp = normalizarFecha(value), iso = fechaDDMMYYaISO(disp);
   return `<div class="date-field"><input type="text" class="date-text" readonly value="${escAttr(disp)}"><input type="date" class="date-native" ${attrsStr} value="${iso}"></div>`;
 }
+
+// Reparación del evento change para fechas
 document.addEventListener('change', (e)=>{
   if (e.target && e.target.classList.contains('date-native')){
+    const disp = isoAFechaDDMMYY(e.target.value);
     const txt = e.target.previousElementSibling;
-    if (txt && txt.classList.contains('date-text')) txt.value = isoAFechaDDMMYY(e.target.value);
+    if (txt && txt.classList.contains('date-text')) {
+      txt.value = disp;
+      // Disparar evento para que se registre el cambio en la tarjeta
+      const tr = e.target.closest('tr');
+      if (tr) {
+        const rowIdx = parseInt(tr.dataset.row, 10);
+        const wrapper = e.target.closest('.card-wrapper');
+        if (wrapper && rowIdx >= 0) {
+          const id = wrapper.id.replace('wrapper_', '');
+          const data = cards[id];
+          if (data && data.filas[rowIdx]) {
+            data.filas[rowIdx].fecha = disp;
+            registrarCambio(data, `Fila ${rowIdx+1} - fecha`, disp);
+            guardarTarjetaFirestore(id);
+            actualizarBitacora(id);
+            actualizarTotalesYSaldo(wrapper.querySelector('.page-boleta'), data);
+          }
+        }
+      } else {
+        // Campo de fecha en encabezado (fechaInicio, fechaFin)
+        const fld = e.target.closest('.fld');
+        if (fld) {
+          const inputF = fld.querySelector('[data-f]');
+          if (inputF) {
+            const campo = inputF.dataset.f;
+            const wrapper = e.target.closest('.card-wrapper');
+            if (wrapper) {
+              const id = wrapper.id.replace('wrapper_', '');
+              const data = cards[id];
+              if (data) {
+                data[campo] = disp;
+                registrarCambio(data, campo, disp);
+                guardarTarjetaFirestore(id);
+                actualizarBitacora(id);
+                actualizarTotalesYSaldo(wrapper.querySelector('.page-boleta'), data);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 });
 
-// ===================== SONIDO =====================
 let sonidoActivo = true;
 function sonarConfirmacion(){
   if (!sonidoActivo) return;
@@ -710,7 +762,6 @@ function toggleModoOscuro(){
   document.getElementById('btnOscuro').classList.toggle('toggle-on', activo);
 }
 
-// ===================== ESTADO =====================
 let cards = {};
 let saveTimers = {};
 let siguienteNumeroCache = null;
@@ -746,7 +797,6 @@ function migrarTarjeta(data){
   return data;
 }
 
-// ===================== FIRESTORE =====================
 function guardarTarjetaFirestore(id){
   if (!cards[id]) return;
   clearTimeout(saveTimers[id]);
@@ -816,7 +866,6 @@ function setStatus(msg, isError){
   setStatus._t = setTimeout(()=>{ el.textContent=''; }, 2500);
 }
 
-// ===================== RENDER =====================
 function renderCard(data){
   const wrapper = document.createElement('div');
   wrapper.className = 'card-wrapper'; wrapper.id = 'wrapper_' + data.id;
@@ -853,8 +902,8 @@ function renderBoletaHtml(data){
     <div class="ficha-num">N° Ficha: ${String(data.numero).padStart(3,'0')}</div>
     <div class="card-header"><h1 class="card-title">Control de Préstamo Chinita Romero</h1><div class="coin">$</div></div>
     <div class="grid2">
-      <div class="fld"><label>Señor(a)</label><input data-f="senor" value="${escAttr(data.senor)}"></div>
-      <div class="fld"><label>Lugar de trabajo</label><input data-f="lugarTrabajo" value="${escAttr(data.lugarTrabajo)}"></div>
+      <div class="fld"><label>Señor(a)</label><input data-f="senor" list="listaNombres" value="${escAttr(data.senor)}" autocomplete="off"></div>
+      <div class="fld"><label>Lugar de trabajo</label><input data-f="lugarTrabajo" list="listaLugares" value="${escAttr(data.lugarTrabajo)}" autocomplete="off"></div>
       <div class="fld"><label>Capital prestado</label><input data-f="capital" type="number" value="${escAttr(data.capital)}"></div>
       <div class="fld"><label>Interés %</label><input data-f="interes" type="number" value="${escAttr(data.interes)}"></div>
       <div class="fld readonly"><label>TOTAL a pagar</label><input data-total value="${formatoMoneda(calcularTotal(data))}" readonly></div>
@@ -904,7 +953,7 @@ function configurarListenersBoleta(container, data){
   container.querySelectorAll('[data-f]').forEach(inp=>{
     inp.addEventListener('focus', ()=>{ inp.dataset.prev = inp.value; });
     inp.addEventListener('change', ()=>{
-      const campo = inp.dataset.f, nuevo = inp.type === 'date' ? isoAFechaDDMMYY(inp.value) : inp.value;
+      const campo = inp.dataset.f, nuevo = inp.value;
       if (inp.dataset.prev !== inp.value){
         data[campo] = nuevo; registrarCambio(data, campo, nuevo);
         actualizarTotalesYSaldo(container, data); actualizarBitacora(data.id); guardarTarjetaFirestore(data.id);
@@ -915,17 +964,22 @@ function configurarListenersBoleta(container, data){
     const tr = inp.closest('tr'), rowIdx = parseInt(tr.dataset.row, 10), campo = inp.dataset.cell;
     inp.addEventListener('focus', ()=>{ inp.dataset.prev = inp.value; });
     inp.addEventListener('blur', ()=>{
-      const val = inp.type === 'date' ? isoAFechaDDMMYY(inp.value) : inp.value;
+      const val = inp.value;
       if (campo === 'abono' && val.trim() !== ''){
-        const inputFecha = tr.querySelector('input[data-cell="fecha"]');
-        if (inputFecha && inputFecha.value.trim() === ''){
-          const hoy = fechaCorta(new Date()); inputFecha.value = fechaDDMMYYaISO(hoy);
-          const txt = inputFecha.previousElementSibling; if (txt) txt.value = hoy;
-          data.filas[rowIdx].fecha = hoy; registrarCambio(data, `Fila ${rowIdx+1} - fecha`, hoy + ' (auto)'); actualizarBitacora(data.id);
+        const fechaInput = tr.querySelector('.date-native');
+        if (fechaInput && !fechaInput.value){
+          const hoy = fechaCorta(new Date());
+          fechaInput.value = fechaDDMMYYaISO(hoy);
+          const txt = fechaInput.previousElementSibling;
+          if (txt) txt.value = hoy;
+          data.filas[rowIdx].fecha = hoy;
+          registrarCambio(data, `Fila ${rowIdx+1} - fecha`, hoy + ' (auto)');
+          actualizarBitacora(data.id);
         }
       }
-      if (inp.dataset.prev !== inp.value){
-        data.filas[rowIdx][campo] = val; registrarCambio(data, `Fila ${rowIdx+1} - ${campo}`, val);
+      if (inp.dataset.prev !== val){
+        data.filas[rowIdx][campo] = val;
+        registrarCambio(data, `Fila ${rowIdx+1} - ${campo}`, val);
         actualizarTotalesYSaldo(container, data); actualizarBitacora(data.id); guardarTarjetaFirestore(data.id);
       }
     });
@@ -980,7 +1034,6 @@ async function borrarTarjeta(id){
   setStatus('Tarjeta borrada');
 }
 
-// ===================== EXPORTAR =====================
 async function exportarImagen(id){
   const wrapper = document.getElementById('wrapper_' + id), boleta = wrapper.querySelector('.page-boleta .card');
   setStatus('Generando imagen...');
@@ -1006,7 +1059,6 @@ async function exportarMensaje(id){
   else window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
 }
 
-// ===================== ORDEN =====================
 function reordenarTarjetas(criterio){
   const cont = document.getElementById('cardsContainer'), lista = Object.values(cards);
   lista.sort((a,b)=>{
@@ -1041,7 +1093,6 @@ function primeraFechaCobro(data){
 
 function prioridadEstado(data){ const e = estadoTarjeta(data); if (e.clase==='atrasado') return 0; if (e.clase==='al-dia') return 1; if (e.clase==='espera') return 2; return 3; }
 
-// ===================== PESTAÑAS =====================
 function cambiarPestana(nombre){
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === nombre));
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + nombre));
